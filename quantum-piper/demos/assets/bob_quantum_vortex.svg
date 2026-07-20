@@ -1,0 +1,166 @@
+<svg viewBox="0 0 1000 800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes vortexSpin {
+        from { transform: rotate(0deg) translateZ(0); }
+        to { transform: rotate(360deg) translateZ(0); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.5; r: 5px; }
+        50% { opacity: 1; r: 8px; }
+      }
+      @keyframes floatUp {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+      }
+      @keyframes glow {
+        0%, 100% { filter: drop-shadow(0 0 8px #00ff88); }
+        50% { filter: drop-shadow(0 0 25px #00ff88); }
+      }
+
+      .vortex { animation: vortexSpin 12s linear infinite; transform-origin: 500px 400px; }
+      .quantum-core { animation: glow 3s ease-in-out infinite; }
+      .gate-node { animation: pulse 2s ease-in-out infinite; }
+      .metric-label { animation: floatUp 3s ease-in-out infinite; }
+    </style>
+
+    <!-- Gradients -->
+    <radialGradient id="coreGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00ff88;stop-opacity:1"/>
+      <stop offset="50%" style="stop-color:#0088ff;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#8800ff;stop-opacity:0.2"/>
+    </radialGradient>
+
+    <linearGradient id="vortexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff0080;stop-opacity:0.8"/>
+      <stop offset="50%" style="stop-color:#00ffff;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#ffff00;stop-opacity:0.4"/>
+    </linearGradient>
+
+    <!-- Filters -->
+    <filter id="glow2">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="800" fill="#0a0e27"/>
+
+  <!-- Grid pattern -->
+  <defs>
+    <pattern id="bgGrid" x="0" y="0" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#1a3a52" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1000" height="800" fill="url(#bgGrid)"/>
+
+  <!-- Vortex rings (animated rotation) -->
+  <g class="vortex">
+    <!-- Outer ring -->
+    <ellipse cx="500" cy="400" rx="280" ry="180" fill="none" stroke="url(#vortexGrad)" stroke-width="3" opacity="0.5"/>
+
+    <!-- Mid ring -->
+    <ellipse cx="500" cy="400" rx="200" ry="140" fill="none" stroke="#ff0080" stroke-width="3" opacity="0.6"/>
+
+    <!-- Inner ring -->
+    <ellipse cx="500" cy="400" rx="120" ry="100" fill="none" stroke="#00ffff" stroke-width="3" opacity="0.7"/>
+  </g>
+
+  <!-- Quantum core (glowing center) -->
+  <g class="quantum-core">
+    <circle cx="500" cy="400" r="45" fill="url(#coreGradient)" filter="url(#glow2)"/>
+    <circle cx="500" cy="400" r="40" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.8"/>
+  </g>
+
+  <!-- Energy flow arrows -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <polygon points="0 0 10 3 0 6" fill="#00ff88" opacity="0.8"/>
+    </marker>
+  </defs>
+
+  <path d="M 280,400 Q 350,350 420,380" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.6" stroke-dasharray="5,5" marker-end="url(#arrow)"/>
+  <path d="M 720,400 Q 650,350 580,380" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.6" stroke-dasharray="5,5" marker-end="url(#arrow)"/>
+
+  <!-- Josephson vortex lattice nodes -->
+  <g opacity="0.7">
+    <!-- Top layer -->
+    <circle cx="420" cy="330" r="4" fill="#00ffff"/>
+    <circle cx="500" cy="300" r="4" fill="#00ffff"/>
+    <circle cx="580" cy="330" r="4" fill="#00ffff"/>
+
+    <!-- Middle layer -->
+    <circle cx="380" cy="400" r="4" fill="#ff88ff"/>
+    <circle cx="620" cy="400" r="4" fill="#ff88ff"/>
+
+    <!-- Bottom layer -->
+    <circle cx="420" cy="470" r="4" fill="#ff0080"/>
+    <circle cx="500" cy="500" r="4" fill="#ff0080"/>
+    <circle cx="580" cy="470" r="4" fill="#ff0080"/>
+  </g>
+
+  <!-- Quantum gate energy levels (pulsing) -->
+  <g class="gate-node">
+    <!-- Pauli X (red) -->
+    <circle cx="650" cy="400" r="6" fill="#ff0080"/>
+
+    <!-- Pauli Y (yellow) -->
+    <circle cx="500" cy="240" r="6" fill="#ffff00"/>
+
+    <!-- Pauli Z (cyan) -->
+    <circle cx="350" cy="400" r="6" fill="#00ffff"/>
+
+    <!-- Hadamard (green) -->
+    <circle cx="580" cy="310" r="5" fill="#00ff88"/>
+
+    <!-- T gate (magenta) -->
+    <circle cx="420" cy="490" r="5" fill="#ff88ff"/>
+  </g>
+
+  <!-- Title -->
+  <text x="500" y="80" text-anchor="middle" fill="#00ff88" font-size="32" font-weight="bold" opacity="0.95">
+    BOB QUANTUM ENGINE
+  </text>
+  <text x="500" y="115" text-anchor="middle" fill="#00ffff" font-size="14" opacity="0.8">
+    Vortex Dynamics • Hamiltonian Evolution • Quantum Metrics
+  </text>
+
+  <!-- Metrics indicators (floating) -->
+  <g class="metric-label">
+    <!-- Entropy -->
+    <circle cx="120" cy="150" r="28" fill="none" stroke="#8800ff" stroke-width="2" opacity="0.7"/>
+    <text x="120" y="148" text-anchor="middle" fill="#8800ff" font-size="14" font-weight="bold">S</text>
+    <text x="120" y="168" text-anchor="middle" fill="#8800ff" font-size="11" opacity="0.9">entropy</text>
+
+    <!-- Purity -->
+    <circle cx="880" cy="150" r="28" fill="none" stroke="#00ffff" stroke-width="2" opacity="0.7"/>
+    <text x="880" y="148" text-anchor="middle" fill="#00ffff" font-size="14" font-weight="bold">P</text>
+    <text x="880" y="168" text-anchor="middle" fill="#00ffff" font-size="11" opacity="0.9">purity</text>
+
+    <!-- Fidelity -->
+    <circle cx="500" cy="720" r="28" fill="none" stroke="#00ff88" stroke-width="2" opacity="0.7"/>
+    <text x="500" y="718" text-anchor="middle" fill="#00ff88" font-size="14" font-weight="bold">F</text>
+    <text x="500" y="738" text-anchor="middle" fill="#00ff88" font-size="11" opacity="0.9">fidelity</text>
+  </g>
+
+  <!-- Status badge -->
+  <rect x="30" y="30" width="140" height="35" fill="none" stroke="#00ff88" stroke-width="2" rx="6"/>
+  <text x="100" y="52" text-anchor="middle" fill="#00ff88" font-size="13" font-weight="bold">⚡ v2.1 • 21 modules</text>
+
+  <!-- Live indicator -->
+  <circle cx="940" cy="60" r="7" fill="#00ff88" opacity="0.9"/>
+  <circle cx="940" cy="60" r="7" fill="none" stroke="#00ff88" stroke-width="1" opacity="0.5">
+    <animate attributeName="r" values="7;12" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="900" y="65" fill="#00ff88" font-size="12" font-weight="bold">LIVE</text>
+
+  <!-- Bottom legend -->
+  <text x="60" y="780" fill="#8800ff" font-size="12" opacity="0.85">State Vector</text>
+  <text x="250" y="780" fill="#ff0080" font-size="12" opacity="0.85">Gates</text>
+  <text x="450" y="780" fill="#00ffff" font-size="12" opacity="0.85">Hamiltonian</text>
+  <text x="720" y="780" fill="#00ff88" font-size="12" opacity="0.85">Metrics</text>
+</svg>
