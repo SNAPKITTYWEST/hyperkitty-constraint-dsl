@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BOB IDE RELEASE 1.0 — Sovereign Development Environment</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; background: #040810; overflow: hidden; }
+
+    body {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #d9fff8;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TITLEBAR */
+    .titlebar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #0a0f1a;
+      border-bottom: 1px solid #2d5a52;
+      height: 34px;
+    }
+    .titlebar-title { font-weight: 600; font-size: 13px; color: #00d4cc; }
+    .titlebar-buttons { display: flex; gap: 4px; }
+    .titlebar-btn {
+      padding: 4px 8px;
+      background: #1a1f2e;
+      border: 1px solid #3e3e42;
+      color: #d4d4d4;
+      cursor: pointer;
+      border-radius: 2px;
+      font-size: 11px;
+    }
+    .titlebar-btn:hover { background: #2d3e4e; }
+
+    /* MAIN LAYOUT */
+    .main-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      gap: 1px;
+      background: #1a1f2e;
+    }
+
+    /* EDITOR PANEL */
+    .editor-panel {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      border-right: 1px solid #3e3e42;
+    }
+
+    .editor-tabs {
+      display: flex;
+      background: #0a0f1a;
+      border-bottom: 1px solid #3e3e42;
+      padding: 4px;
+      gap: 2px;
+    }
+
+    .editor-tab {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: #969696;
+      cursor: pointer;
+      font-size: 12px;
+      border-bottom: 2px solid transparent;
+    }
+
+    .editor-tab.active {
+      color: #d4d4d4;
+      border-bottom-color: #00d4cc;
+    }
+
+    .editor-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    textarea.code-editor {
+      flex: 1;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: none;
+      outline: none;
+      padding: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      line-height: 1.6;
+      resize: none;
+      tab-size: 2;
+    }
+
+    .editor-statusbar {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 12px;
+      background: #007acc;
+      border-top: 1px solid #3e3e42;
+      font-size: 11px;
+      color: #fff;
+    }
+
+    /* RIGHT PANEL */
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      width: 40%;
+      border-left: 1px solid #3e3e42;
+      background: #0a0f1a;
+    }
+
+    .panel-tabs {
+      display: flex;
+      background: #0a0f1a;
+      border-bottom: 1px solid #3e3e42;
+      padding: 4px;
+      gap: 2px;
+    }
+
+    .panel-tab {
+      padding: 6px 12px;
+      background: transparent;
+      border: none;
+      color: #969696;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .panel-tab.active {
+      color: #d4d4d4;
+      background: #1a1f2e;
+      border-radius: 2px;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      display: none;
+    }
+
+    .panel-content.active { display: block; }
+
+    /* TERMINAL */
+    .terminal-output {
+      flex: 1;
+      overflow-y: auto;
+      background: #1e1e1e;
+      padding: 8px;
+      font-size: 12px;
+      line-height: 1.4;
+      border: 1px solid #3e3e42;
+      margin-bottom: 8px;
+    }
+
+    .terminal-line {
+      margin-bottom: 4px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .terminal-line.input { color: #00d4cc; font-weight: bold; }
+    .terminal-line.output { color: #d4d4d4; }
+    .terminal-line.error { color: #ff5470; }
+    .terminal-line.success { color: #00ff88; }
+
+    .terminal-input-row {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      background: #1a1f2e;
+      border: 1px solid #3e3e42;
+      border-radius: 2px;
+    }
+
+    .terminal-prompt { color: #00ff88; font-weight: 800; }
+    .terminal-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #effffb;
+      font-family: inherit;
+      font-size: 12px;
+      caret-color: #00d4cc;
+    }
+
+    /* XML COMPILER */
+    .xml-section {
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #1a1f2e;
+      border: 1px solid #3e3e42;
+      border-radius: 2px;
+    }
+
+    .xml-label { font-size: 10px; color: #00d4cc; font-weight: 600; margin-bottom: 4px; }
+    .xml-textarea {
+      width: 100%;
+      padding: 6px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border: 1px solid #3e3e42;
+      font-family: inherit;
+      font-size: 10px;
+      resize: none;
+      margin-bottom: 4px;
+    }
+
+    .xml-button {
+      width: 100%;
+      padding: 6px;
+      background: #00d4cc;
+      color: #000;
+      border: none;
+      border-radius: 2px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 11px;
+      font-family: inherit;
+    }
+
+    .xml-button:hover { background: #00f5e8; }
+    .xml-button:disabled { background: #3e3e42; color: #a0a0a0; cursor: not-allowed; }
+
+    .xml-output {
+      background: #1e1e1e;
+      padding: 6px;
+      border: 1px solid #3e3e42;
+      font-size: 9px;
+      color: #d4d4d4;
+      max-height: 100px;
+      overflow-y: auto;
+      border-radius: 2px;
+      font-family: inherit;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* OMEGA SHELL */
+    .omega-shell {
+      --omega-cyan: #64ffe3;
+      --omega-green: #58ff92;
+      position: fixed;
+      inset: auto 0 0 0;
+      height: min(35vh, 380px);
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, rgba(2, 9, 9, .88), rgba(4, 18, 17, .96));
+      border-top: 1px solid rgba(70, 255, 214, .22);
+      backdrop-filter: blur(12px);
+      z-index: 10000;
+    }
+
+    .omega-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      height: 34px;
+      border-bottom: 1px solid rgba(70, 255, 214, .22);
+    }
+
+    .omega-mark {
+      color: var(--omega-cyan);
+      font-weight: 900;
+      letter-spacing: .08em;
+      text-shadow: 0 0 16px rgba(100,255,227,.65);
+    }
+
+    .omega-state {
+      color: var(--omega-green);
+      font-size: 10px;
+      letter-spacing: .12em;
+    }
+
+    .omega-spacer { flex: 1; }
+    .omega-chip {
+      border: 1px solid rgba(70, 255, 214, .22);
+      border-radius: 999px;
+      padding: 2px 8px;
+      color: #71958f;
+      font-size: 9px;
+    }
+
+    .omega-output {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 12px;
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .omega-line {
+      margin-bottom: 2px;
+      white-space: pre-wrap;
+    }
+
+    .omega-line[data-kind="system"] { color: var(--omega-cyan); }
+    .omega-line[data-kind="ok"] { color: var(--omega-green); }
+    .omega-line[data-kind="error"] { color: #ff5470; }
+
+    .omega-input-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(0,0,0,.2);
+      border-top: 1px solid rgba(70, 255, 214, .22);
+    }
+
+    .omega-prompt { color: var(--omega-green); font-weight: 800; }
+    .omega-input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: #effffb;
+      font-family: inherit;
+      font-size: 11px;
+      caret-color: var(--omega-cyan);
+    }
+
+    .omega-run {
+      border: 1px solid rgba(100,255,227,.3);
+      border-radius: 4px;
+      padding: 4px 9px;
+      color: var(--omega-cyan);
+      background: rgba(27,104,94,.14);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 10px;
+    }
+
+    .omega-run:hover {
+      background: rgba(27,104,94,.3);
+      box-shadow: 0 0 12px rgba(100,255,227,.12);
+    }
+  </style>
+</head>
+<body>
+  <!-- TITLEBAR -->
+  <div class="titlebar">
+    <div class="titlebar-title">🤖 BOB IDE RELEASE 1.0 — Sovereign Development Environment</div>
+    <div class="titlebar-buttons">
+      <button class="titlebar-btn" onclick="saveFile()">💾 Save</button>
+      <button class="titlebar-btn" onclick="runCode()">▶ Run</button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <div class="main-container">
+    <!-- EDITOR -->
+    <div class="editor-panel">
+      <div class="editor-tabs">
+        <button class="editor-tab active" onclick="switchTab('editor', 'code')">📝 main.ts</button>
+        <button class="editor-tab" onclick="switchTab('editor', 'schema')">📋 types.ts</button>
+      </div>
+      <div class="editor-content">
+        <textarea id="code-editor" class="code-editor" placeholder="// Write your code here...">// BOB IDE RELEASE 1.0
+// Powered by IBM Granite vLLM + Sovereign XML Compiler
+
+interface BobArtifact {
+  hash: string;
+  type: string;
+  content: Uint8Array;
+  wormAnchor?: string;
+}
+
+function createArtifact(content: string): BobArtifact {
+  return {
+    hash: "blake3:" + Math.random().toString(36),
+    type: "SourceCode",
+    content: new TextEncoder().encode(content),
+    wormAnchor: "genesis"
+  };
+}
+
+// Main execution
+const artifact = createArtifact("Hello from BOB IDE!");
+console.log(artifact);
+</textarea>
+        <div class="editor-statusbar">
+          <span id="editor-lang">typescript</span>
+          <span id="editor-stats">0 lines · 0 chars</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="panel-tabs">
+        <button class="panel-tab active" onclick="switchPanel('terminal')">⟩ Terminal</button>
+        <button class="panel-tab" onclick="switchPanel('xml')">🔮 XML Compiler</button>
+        <button class="panel-tab" onclick="switchPanel('git')">🔒 Git</button>
+      </div>
+
+      <!-- TERMINAL -->
+      <div id="terminal-panel" class="panel-content active">
+        <div class="terminal-output" id="terminal-output">
+          <div class="terminal-line output">[BOB IDE] Terminal ready</div>
+          <div class="terminal-line output">[WORM] Chain initialized</div>
+          <div class="terminal-line output">[Granite] Model engine loaded</div>
+        </div>
+        <div class="terminal-input-row">
+          <span class="terminal-prompt">$</span>
+          <input id="terminal-input" class="terminal-input" placeholder="bash, git, npm, python..." />
+          <button class="omega-run" onclick="executeTerminal()">RUN</button>
+        </div>
+      </div>
+
+      <!-- XML COMPILER -->
+      <div id="xml-panel" class="panel-content">
+        <div class="xml-section">
+          <div class="xml-label">Step 1: Natural Language</div>
+          <textarea id="xml-input" class="xml-textarea" placeholder="You are a zero-sorry Lean 4 verifier..." style="height: 60px;"></textarea>
+          <button class="xml-button" onclick="compileXML()">Compile to XML</button>
+        </div>
+
+        <div class="xml-section" id="xml-result" style="display: none;">
+          <div class="xml-label">✅ Compiled XML</div>
+          <div class="xml-output" id="xml-output"></div>
+        </div>
+
+        <div class="xml-section">
+          <div class="xml-label">Step 2: Model Control</div>
+          <select id="model-select" class="xml-textarea" style="height: auto; padding: 6px;">
+            <option value="granite">IBM Granite (vLLM)</option>
+            <option value="nemotron">Nemotron</option>
+            <option value="mistral">Mistral</option>
+          </select>
+          <textarea id="query-input" class="xml-textarea" placeholder="Ask the model..." style="height: 50px;"></textarea>
+          <button class="xml-button" onclick="controlModel()">Run Model</button>
+        </div>
+      </div>
+
+      <!-- GIT -->
+      <div id="git-panel" class="panel-content">
+        <div class="terminal-output" id="git-output" style="height: 100%; border: none;">
+          <div class="terminal-line output">[GIT] Ready</div>
+        </div>
+        <div class="terminal-input-row">
+          <span class="terminal-prompt">git›</span>
+          <input id="git-input" class="terminal-input" placeholder="status, log, commit..." />
+          <button class="omega-run" onclick="executeGit()">RUN</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OMEGA SHELL (Bottom) -->
+  <div class="omega-shell">
+    <header class="omega-bar">
+      <strong class="omega-mark">Ω OMEGA SHELL</strong>
+      <span class="omega-state">EVIDENCE OR SILENCE</span>
+      <span class="omega-spacer"></span>
+      <span class="omega-chip">GRANITE vLLM</span>
+      <span class="omega-chip">RELEASE 1.0</span>
+    </header>
+    <main class="omega-output" id="omega-output">
+      <div class="omega-line" data-kind="system">[Ω] BOB IDE Release 1.0 mounted</div>
+      <div class="omega-line" data-kind="system">[policy] commands via allowlist: git, grep, curl, bash, npm, python</div>
+      <div class="omega-line" data-kind="system">[granite] IBM Granite vLLM ready for inference</div>
+    </main>
+    <form class="omega-input-row" onsubmit="executeOmega(event)">
+      <label class="omega-prompt" for="omega-input">Ω›</label>
+      <input class="omega-input" id="omega-input" autocomplete="off" placeholder="git status" />
+      <button class="omega-run" type="submit">EXECUTE</button>
+    </form>
+  </div>
+
+  <script>
+    // ================================================================
+    // BOB IDE RELEASE 1.0 — Pure JavaScript, Browser + Terminal Ready
+    // ================================================================
+
+    const API_BASE = 'http://localhost:3000';
+    let currentXML = null;
+
+    // ================================================================
+    // UI NAVIGATION
+    // ================================================================
+
+    function switchTab(panel, tab) {
+      document.querySelectorAll(`.${panel}-tab`).forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    function switchPanel(panel) {
+      document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+      document.getElementById(`${panel}-panel`).classList.add('active');
+      document.querySelectorAll('.panel-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // ================================================================
+    // EDITOR
+    // ================================================================
+
+    const editor = document.getElementById('code-editor');
+    editor.addEventListener('input', () => {
+      const lines = editor.value.split('\n').length;
+      const chars = editor.value.length;
+      document.getElementById('editor-stats').textContent = `${lines} lines · ${chars} chars`;
+    });
+
+    function saveFile() {
+      const code = editor.value;
+      fetch(`${API_BASE}/api/file/write`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: 'main.ts', content: code })
+      }).then(r => r.json()).then(d => {
+        addTerminalLine(d.ok ? '✅ File saved' : '❌ Save failed', d.ok ? 'success' : 'error');
+      });
+    }
+
+    function runCode() {
+      const code = editor.value;
+      if (code.includes('function') || code.includes('const')) {
+        try {
+          eval(code);
+          addTerminalLine('✅ Code executed', 'success');
+        } catch (e) {
+          addTerminalLine(`❌ ${e.message}`, 'error');
+        }
+      }
+    }
+
+    // ================================================================
+    // TERMINAL
+    // ================================================================
+
+    function executeTerminal() {
+      const cmd = document.getElementById('terminal-input').value.trim();
+      if (!cmd) return;
+
+      addTerminalLine(`$ ${cmd}`, 'input');
+      document.getElementById('terminal-input').value = '';
+
+      fetch(`${API_BASE}/api/omega/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+      }).then(r => r.json()).then(d => {
+        if (d.ok) {
+          addTerminalLine(d.output || '[no output]', 'output');
+        } else {
+          addTerminalLine(d.error || d.output, 'error');
+        }
+      }).catch(e => addTerminalLine(e.message, 'error'));
+    }
+
+    function addTerminalLine(text, type = 'output') {
+      const output = document.getElementById('terminal-output');
+      const line = document.createElement('div');
+      line.className = `terminal-line ${type}`;
+      line.textContent = text;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // ================================================================
+    // OMEGA SHELL (Bottom)
+    // ================================================================
+
+    function executeOmega(event) {
+      event.preventDefault();
+      const cmd = document.getElementById('omega-input').value.trim();
+      if (!cmd) return;
+
+      const output = document.getElementById('omega-output');
+      const line = document.createElement('div');
+      line.className = 'omega-line';
+      line.setAttribute('data-kind', 'system');
+      line.textContent = `Ω› ${cmd}`;
+      output.appendChild(line);
+      document.getElementById('omega-input').value = '';
+
+      fetch(`${API_BASE}/api/omega/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+      }).then(r => r.json()).then(d => {
+        const resultLine = document.createElement('div');
+        resultLine.className = 'omega-line';
+        resultLine.setAttribute('data-kind', d.ok ? 'ok' : 'error');
+        resultLine.textContent = d.output || d.error;
+        output.appendChild(resultLine);
+        output.scrollTop = output.scrollHeight;
+      }).catch(e => {
+        const errLine = document.createElement('div');
+        errLine.className = 'omega-line';
+        errLine.setAttribute('data-kind', 'error');
+        errLine.textContent = `[SILENCE] ${e.message}`;
+        output.appendChild(errLine);
+      });
+    }
+
+    // ================================================================
+    // XML COMPILER
+    // ================================================================
+
+    function compileXML() {
+      const input = document.getElementById('xml-input').value.trim();
+      if (!input) return;
+
+      fetch(`${API_BASE}/api/xml/compile`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'skeleton', naturalLanguage: input })
+      }).then(r => r.json()).then(d => {
+        if (d.ok) {
+          currentXML = d.xmlOutput;
+          document.getElementById('xml-output').textContent = d.xmlOutput.slice(0, 300);
+          document.getElementById('xml-result').style.display = 'block';
+        }
+      });
+    }
+
+    function controlModel() {
+      if (!currentXML) return alert('Compile XML first');
+      const query = document.getElementById('query-input').value.trim();
+      if (!query) return;
+
+      fetch(`${API_BASE}/api/xml/control-model`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          xmlPrompt: currentXML,
+          model: document.getElementById('model-select').value,
+          userQuery: query
+        })
+      }).then(r => r.json()).then(d => {
+        if (d.ok) {
+          const result = document.createElement('div');
+          result.className = 'xml-output';
+          result.style.marginTop = '8px';
+          result.textContent = d.response;
+          document.getElementById('xml-panel').appendChild(result);
+        }
+      });
+    }
+
+    // ================================================================
+    // GIT
+    // ================================================================
+
+    function executeGit() {
+      const cmd = `git ${document.getElementById('git-input').value.trim()}`;
+      if (cmd === 'git ') return;
+
+      const line = document.createElement('div');
+      line.className = 'terminal-line input';
+      line.textContent = `git› ${cmd}`;
+      document.getElementById('git-output').appendChild(line);
+      document.getElementById('git-input').value = '';
+
+      fetch(`${API_BASE}/api/omega/run`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+      }).then(r => r.json()).then(d => {
+        const resultLine = document.createElement('div');
+        resultLine.className = 'terminal-line output';
+        resultLine.textContent = d.output || d.error;
+        document.getElementById('git-output').appendChild(resultLine);
+        document.getElementById('git-output').scrollTop = document.getElementById('git-output').scrollHeight;
+      });
+    }
+
+    // ================================================================
+    // INIT
+    // ================================================================
+
+    document.getElementById('terminal-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') executeTerminal();
+    });
+
+    console.log('🤖 BOB IDE RELEASE 1.0 loaded');
+  </script>
+</body>
+</html>
