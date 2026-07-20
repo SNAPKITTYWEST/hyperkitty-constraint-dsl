@@ -386,6 +386,78 @@ app.post<{ Body: { script: string; args?: string[] } }>('/api/bash', async (req)
 });
 
 // =====================================================================
+// OMEGA SHELL (GUARDED COMMAND EXECUTION)
+// =====================================================================
+
+const OMEGA_ALLOWLIST = [
+  'PWD', 'LS', 'DIR', 'GIT', 'CARGO', 'LAKE', 'DUNE', 'DOTNET',
+  'NIM', 'JQ', 'MAKE', 'CMAKE', 'CLANG', 'LLVM-OBJDUMP', 'LLVM-READOBJ',
+  'QEMU-SYSTEM-X86_64', 'GREP', 'CURL', 'BASH', 'SH', 'CAT', 'ECHO',
+  'FIND', 'WHICH', 'UNAME', 'WHOAMI', 'CHMOD', 'CHOWN', 'NODE', 'NPM',
+  'PYTHON', 'PYTHON3', 'RUBY', 'GO', 'RUSTC', 'CARGO', 'GFORTRAN',
+  'GCC', 'G++', 'CLANG++', 'JAVA', 'JAVAC', 'GHCI', 'OCAML',
+];
+
+app.post<{ Body: { command: string } }>('/api/omega/run', async (req, reply) => {
+  const { command } = req.body;
+
+  if (!command || !command.trim()) {
+    reply.status(400).send({ error: 'No command supplied', exitCode: 77 });
+    return;
+  }
+
+  // Extract first word (command name)
+  const firstWord = command.trim().split(/\s+/)[0].toUpperCase();
+
+  // Check allowlist
+  if (!OMEGA_ALLOWLIST.includes(firstWord)) {
+    return {
+      ok: false,
+      output: `[OMEGA:SILENCE] command rejected by allowlist: ${firstWord}`,
+      error: 'Command not allowed',
+      exitCode: 77,
+    };
+  }
+
+  // Reject shell metacharacters
+  const dangerous = ['&&', '||', ';', '|', '>', '<', '`', '$', '&'];
+  for (const char of dangerous) {
+    if (command.includes(char)) {
+      return {
+        ok: false,
+        output: '[OMEGA:SILENCE] shell metacharacters rejected',
+        error: 'Metacharacters not allowed',
+        exitCode: 77,
+      };
+    }
+  }
+
+  try {
+    const output = execSync(command, {
+      cwd: process.cwd(),
+      env: process.env,
+      encoding: 'utf-8',
+      timeout: 30000,
+      stdio: 'pipe',
+    }).trim();
+
+    return {
+      ok: true,
+      output,
+      error: '',
+      exitCode: 0,
+    };
+  } catch (error: any) {
+    return {
+      ok: false,
+      output: error.stdout || '',
+      error: error.stderr || error.message,
+      exitCode: error.status || 1,
+    };
+  }
+});
+
+// =====================================================================
 // ARTIFACT OPERATIONS
 // =====================================================================
 

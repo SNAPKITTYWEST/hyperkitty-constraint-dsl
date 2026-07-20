@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { AppShell } from './components/shell/AppShell';
 import { Welcome } from './pages/Welcome';
+import { OmegaShell } from './components/terminal/OmegaShell';
+import { SovereignIDE } from './components/ide/SovereignIDE';
 import { useWorkspaceStore } from './stores/workspace.store';
 import { sovereignIDE } from '../artifacts/SOVEREIGN_IDE_FRAMEWORK';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [sovereignReady, setSovereignReady] = useState(false);
+  const [showIDE, setShowIDE] = useState(false);
   const { workspaceId, initialize } = useWorkspaceStore();
 
   useEffect(() => {
@@ -44,8 +47,23 @@ function App() {
     return <Welcome />;
   }
 
-  // Show main IDE shell
-  return <AppShell />;
+  // Toggle between Vortex shell (game) and Sovereign IDE (editor)
+  if (showIDE) {
+    return (
+      <div>
+        <SovereignIDE />
+        <OmegaShell />
+      </div>
+    );
+  }
+
+  // Show main Vortex shell (game world)
+  return (
+    <div>
+      <AppShell />
+      <OmegaShell />
+    </div>
+  );
 }
 
 export default App;
