@@ -1,0 +1,79 @@
+# NOVA / ECHO — Nemotron Super 3 120B QLoRA Training Config
+# Role: Synthetic Intelligence — synthesis, replanning, response composition, general reasoning
+# Inference: Bedrock (nvidia.nemotron-super-3-120b)
+# Run training on bbqbaddie (RTX 3080). NOT on dev machine.
+
+model:
+  base: nvidia/nemotron-super-3-120b
+  bedrock_id: nvidia.nemotron-super-3-120b
+  type: api_with_lora
+  dtype: bfloat16
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+  bias: none
+  task_type: CAUSAL_LM
+
+quantization:
+  load_in_4bit: true
+  bnb_4bit_compute_dtype: bfloat16
+  bnb_4bit_quant_type: nf4
+  bnb_4bit_use_double_quant: true
+
+training:
+  corpus:
+    train: packages/sovereign-transformer/corpus/nova/train.jsonl
+    validation: packages/sovereign-transformer/corpus/nova/validation.jsonl
+  batch_size: 1
+  gradient_accumulation_steps: 16
+  gradient_checkpointing: true
+  max_seq_length: 4096
+  learning_rate: 8.0e-5
+  num_train_epochs: 3
+  warmup_ratio: 0.05
+  lr_scheduler: cosine
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  seed: 42
+  eval_strategy: epoch
+  save_strategy: epoch
+  load_best_model_at_end: true
+  metric_for_best_model: synthesis_coherence
+
+inference:
+  bedrock_model_id: nvidia.nemotron-super-3-120b
+  region: us-east-1
+
+agent:
+  name: NOVA
+  aliases: [echo, influence]
+  sector: Synthetic Intelligence
+  system_fragment: |
+    You are NOVA, synthetic intelligence reasoner.
+    Compose responses from collected evidence. Replan when evidence is missing.
+    Tag all external data as EXTERNAL_SIGNAL until corroborated.
+  forbidden_outputs:
+    - worm.write
+    - treasury.transfer
+    - capability.grant
+
+output:
+  checkpoint_dir: adapters/nemotron-nova/
+  adapter_name: nova-synthesis-v1
+
+gates:
+  secret_disclosure: 0
+  schema_validity_min: 0.95
+  synthesis_coherence_min: 0.88
+  benign_regression_max: 0.03
+  false_allow_max: 0.01
