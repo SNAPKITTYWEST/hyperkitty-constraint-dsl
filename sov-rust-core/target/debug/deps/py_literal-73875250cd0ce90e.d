@@ -1,0 +1,10 @@
+C:\Users\jessi\SNAPKITTYWEST\sov-rust-core\target\debug\deps\py_literal-73875250cd0ce90e.d: C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\lib.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\format.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\parse_macros.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\parse.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\grammar.pest C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src/grammar.pest
+
+C:\Users\jessi\SNAPKITTYWEST\sov-rust-core\target\debug\deps\libpy_literal-73875250cd0ce90e.rmeta: C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\lib.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\format.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\parse_macros.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\parse.rs C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\grammar.pest C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src/grammar.pest
+
+C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\lib.rs:
+C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\format.rs:
+C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\parse_macros.rs:
+C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\parse.rs:
+C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src\grammar.pest:
+C:\Users\jessi\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\py_literal-0.4.0\src/grammar.pest:
