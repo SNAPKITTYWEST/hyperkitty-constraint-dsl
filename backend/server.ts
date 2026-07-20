@@ -12,6 +12,13 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import os from 'os';
 import { WasmEngine } from './wasm';
+import {
+  compileNaturalLanguageToXML,
+  controlModelViaXML,
+  CompilationMode,
+  XMLCompilationRequest,
+  ModelControlRequest,
+} from './xml-compiler-bridge';
 
 const app = Fastify({ logger: true });
 const wasmEngine = new WasmEngine();
@@ -453,6 +460,41 @@ app.post<{ Body: { command: string } }>('/api/omega/run', async (req, reply) => 
       output: error.stdout || '',
       error: error.stderr || error.message,
       exitCode: error.status || 1,
+    };
+  }
+});
+
+// =====================================================================
+// XML COMPILER (NATURAL LANGUAGE → XML PROMPTS)
+// =====================================================================
+
+app.post<{ Body: XMLCompilationRequest }>('/api/xml/compile', async (req) => {
+  try {
+    const result = await compileNaturalLanguageToXML(req.body);
+    return {
+      ok: true,
+      ...result,
+    };
+  } catch (error: any) {
+    return {
+      ok: false,
+      error: error.message,
+    };
+  }
+});
+
+// Control mini models (Granite, Nemotron, etc.) via XML-derived prompts
+app.post<{ Body: ModelControlRequest }>('/api/xml/control-model', async (req) => {
+  try {
+    const result = await controlModelViaXML(req.body);
+    return {
+      ok: true,
+      ...result,
+    };
+  } catch (error: any) {
+    return {
+      ok: false,
+      error: error.message,
     };
   }
 });

@@ -1,0 +1,27 @@
+# GBNF grammar for sovereign XML system prompts
+# Use with llama.cpp: --grammar-file sovereign_prompt.gbnf
+# Forces 100% valid XML on first attempt — zero correction iterations
+
+root ::= system-prompt
+
+system-prompt ::= "<system_prompt>" ws identity ws logic-gates ws execution-flow ws "</system_prompt>"
+
+identity ::= "<identity>" ws text ws "</identity>"
+
+logic-gates ::= "<logic_gates>" ws gate* ws "</logic_gates>"
+
+gate ::= "<gate>" ws
+         "<name>" text "</name>" ws
+         "<condition>" text "</condition>" ws
+         "<action>" text "</action>" ws
+         "</gate>" ws
+
+execution-flow ::= "<execution_flow>" ws step* ws "</execution_flow>"
+
+step ::= "<step>" ws
+         "<order>" [0-9]+ "</order>" ws
+         "<instruction>" text "</instruction>" ws
+         "</step>" ws
+
+text ::= [^<>]+
+ws ::= [ \t\n\r]*

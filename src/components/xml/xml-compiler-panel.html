@@ -1,0 +1,287 @@
+<!-- XML COMPILER PANEL — Vanilla JS, no React deps -->
+<section id="xml-compiler-panel" style="
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 8px;
+  padding: 12px;
+  background: #1e1e1e;
+  color: #d9fff8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+">
+  <div style="font-size: 14px; font-weight: 600; color: #00d4cc;">🔮 XML Compiler</div>
+
+  <!-- STEP 1: COMPILE -->
+  <div style="border: 1px solid #3e3e42; padding: 12px; border-radius: 4px;">
+    <div style="font-size: 12px; color: #00d4cc; margin-bottom: 8px;">Step 1: Natural Language → XML</div>
+
+    <div style="margin-bottom: 8px;">
+      <label style="font-size: 11px; color: #a0a0a0;">Mode:</label>
+      <select id="xml-mode" style="
+        width: 100%;
+        padding: 4px 6px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border: 1px solid #3e3e42;
+        margin-top: 4px;
+        font-size: 11px;
+        font-family: inherit;
+      ">
+        <option value="gbnf">GBNF (Grammar-constrained, 100% valid)</option>
+        <option value="skeleton" selected>Skeleton (Fill {{PLACEHOLDERS}})</option>
+        <option value="dual-pass">Dual-pass (CoT + XML)</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label style="font-size: 11px; color: #a0a0a0;">Natural Language:</label>
+      <textarea id="xml-input" placeholder="You are a zero-sorry Lean 4 verifier..." style="
+        width: 100%;
+        height: 80px;
+        padding: 6px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border: 1px solid #3e3e42;
+        margin-top: 4px;
+        font-size: 11px;
+        font-family: inherit;
+        resize: none;
+      "></textarea>
+    </div>
+
+    <button id="xml-compile-btn" style="
+      width: 100%;
+      padding: 6px;
+      background: #00d4cc;
+      color: #000;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      font-family: inherit;
+    ">Compile to XML</button>
+  </div>
+
+  <!-- RESULT -->
+  <div id="xml-result" style="border: 1px solid #00d4cc; padding: 12px; border-radius: 4px; display: none;">
+    <div id="xml-status" style="font-size: 12px; color: #00ff88; margin-bottom: 8px;">✓ VALID XML</div>
+    <div id="xml-output" style="
+      background: #1e1e1e;
+      padding: 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: inherit;
+      color: #d4d4d4;
+      max-height: 120px;
+      overflow: auto;
+      border: 1px solid #3e3e42;
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    "></div>
+    <div id="xml-timing" style="font-size: 10px; color: #a0a0a0;"></div>
+  </div>
+
+  <!-- STEP 2: CONTROL MODEL -->
+  <div id="model-control" style="border: 1px solid #3e3e42; padding: 12px; border-radius: 4px; display: none;">
+    <div style="font-size: 12px; color: #00d4cc; margin-bottom: 8px;">Step 2: Control Model with XML</div>
+
+    <div style="margin-bottom: 8px;">
+      <label style="font-size: 11px; color: #a0a0a0;">Model:</label>
+      <select id="model-select" style="
+        width: 100%;
+        padding: 4px 6px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border: 1px solid #3e3e42;
+        margin-top: 4px;
+        font-size: 11px;
+        font-family: inherit;
+      ">
+        <option value="nemotron">Nemotron (Nvidia)</option>
+        <option value="granite">IBM Granite</option>
+        <option value="mistral">Mistral</option>
+        <option value="llama2">Llama 2</option>
+      </select>
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label style="font-size: 11px; color: #a0a0a0;">Query:</label>
+      <textarea id="model-query" placeholder="Ask the model something..." style="
+        width: 100%;
+        height: 60px;
+        padding: 6px;
+        background: #1e1e1e;
+        color: #d4d4d4;
+        border: 1px solid #3e3e42;
+        margin-top: 4px;
+        font-size: 11px;
+        font-family: inherit;
+        resize: none;
+      "></textarea>
+    </div>
+
+    <button id="model-run-btn" style="
+      width: 100%;
+      padding: 6px;
+      background: #ffd700;
+      color: #000;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 12px;
+      font-family: inherit;
+    ">Run Model</button>
+  </div>
+
+  <!-- MODEL RESPONSE -->
+  <div id="model-response" style="border: 1px solid #ffd700; padding: 12px; border-radius: 4px; display: none;">
+    <div id="model-response-header" style="font-size: 12px; color: #ffd700; margin-bottom: 8px;">✓ Model Response</div>
+    <div id="model-response-text" style="
+      background: #1e1e1e;
+      padding: 8px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: inherit;
+      color: #d4d4d4;
+      max-height: 120px;
+      overflow: auto;
+      border: 1px solid #3e3e42;
+      margin-bottom: 8px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    "></div>
+    <div id="model-response-timing" style="font-size: 10px; color: #a0a0a0;"></div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="xml-error" style="
+    background: #ff5470;
+    color: #000;
+    padding: 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    display: none;
+  "></div>
+</section>
+
+<script>
+(function () {
+  const compileBtn = document.getElementById('xml-compile-btn');
+  const modeSelect = document.getElementById('xml-mode');
+  const inputText = document.getElementById('xml-input');
+  const resultDiv = document.getElementById('xml-result');
+  const statusDiv = document.getElementById('xml-status');
+  const outputDiv = document.getElementById('xml-output');
+  const timingDiv = document.getElementById('xml-timing');
+  const modelControlDiv = document.getElementById('model-control');
+  const modelSelect = document.getElementById('model-select');
+  const queryText = document.getElementById('model-query');
+  const runBtn = document.getElementById('model-run-btn');
+  const responseDiv = document.getElementById('model-response');
+  const responseHeader = document.getElementById('model-response-header');
+  const responseText = document.getElementById('model-response-text');
+  const responseTiming = document.getElementById('model-response-timing');
+  const errorDiv = document.getElementById('xml-error');
+
+  let currentXML = null;
+
+  // Compile to XML
+  compileBtn.addEventListener('click', async () => {
+    const input = inputText.value.trim();
+    if (!input) {
+      showError('Please enter natural language instruction');
+      return;
+    }
+
+    compileBtn.disabled = true;
+    compileBtn.textContent = 'Compiling...';
+    errorDiv.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/xml/compile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: modeSelect.value,
+          naturalLanguage: input,
+          temperature: 0.3,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        currentXML = data.xmlOutput;
+        statusDiv.textContent = data.validationStatus === 'VALID' ? '✅ VALID XML' : '⚠️ ' + data.validationStatus;
+        outputDiv.textContent = data.xmlOutput.slice(0, 500) + (data.xmlOutput.length > 500 ? '...' : '');
+        timingDiv.textContent = `${data.metadata.executionTimeMs}ms`;
+        resultDiv.style.display = 'block';
+        modelControlDiv.style.display = 'block';
+      } else {
+        showError(data.error || 'Compilation failed');
+      }
+    } catch (e) {
+      showError(e.message);
+    } finally {
+      compileBtn.disabled = false;
+      compileBtn.textContent = 'Compile to XML';
+    }
+  });
+
+  // Run Model
+  runBtn.addEventListener('click', async () => {
+    if (!currentXML) {
+      showError('Compile natural language to XML first');
+      return;
+    }
+
+    const query = queryText.value.trim();
+    if (!query) {
+      showError('Please enter a model query');
+      return;
+    }
+
+    runBtn.disabled = true;
+    runBtn.textContent = 'Running...';
+    errorDiv.style.display = 'none';
+
+    try {
+      const res = await fetch('/api/xml/control-model', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          xmlPrompt: currentXML,
+          model: modelSelect.value,
+          userQuery: query,
+          temperature: 0.7,
+          maxTokens: 512,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.ok) {
+        responseHeader.textContent = `✓ Model Response (${data.model})`;
+        responseText.textContent = data.response;
+        responseTiming.textContent = `${data.executionTimeMs}ms`;
+        responseDiv.style.display = 'block';
+      } else {
+        showError(data.error || 'Model control failed');
+      }
+    } catch (e) {
+      showError(e.message);
+    } finally {
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run Model';
+    }
+  });
+
+  function showError(msg) {
+    errorDiv.textContent = '❌ ' + msg;
+    errorDiv.style.display = 'block';
+  }
+})();
+</script>
