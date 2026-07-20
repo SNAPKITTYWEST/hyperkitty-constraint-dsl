@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/para_3d.gd" id="1_para3d"]
+
+[node name="Para3D" type="CharacterBody3D"]
+script = ExtResource("1_para3d")

@@ -1,0 +1,22 @@
+{
+  "sk_pro_3f7df53d89b442179d6968b0": {
+    "tier": "free",
+    "calls": 1,
+    "daily_usage": [
+      {
+        "ts": "2026-07-14T11:53:56.149Z",
+        "credits": 5,
+        "tool": "metatron.cube",
+        "seal": "e654b61170ff6164"
+      }
+    ],
+    "monthly_usage": [
+      {
+        "ts": "2026-07-14T11:53:56.149Z",
+        "credits": 5,
+        "tool": "metatron.cube",
+        "seal": "e654b61170ff6164"
+      }
+    ]
+  }
+}

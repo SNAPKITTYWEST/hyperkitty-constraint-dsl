@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/agent_nova.gd" id="1_nova"]
+
+[node name="AgentNova" type="CharacterBody3D"]
+script = ExtResource("1_nova")
