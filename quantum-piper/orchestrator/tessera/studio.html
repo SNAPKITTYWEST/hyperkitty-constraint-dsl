@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tessera Studio</title>
+    <link rel="stylesheet" href="studio.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">BOB Spatial Language</p>
+        <h1>Tessera Studio</h1>
+        <p>The art is the program. The layout is the logic. The hash is the seal.</p>
+      </section>
+
+      <section class="workbench">
+        <div class="editor-panel">
+          <div class="panel-head">
+            <h2>ASCII Source</h2>
+            <div class="actions">
+              <button data-load="bob">BOB</button>
+              <button data-load="full">Full Pipeline</button>
+              <button data-load="call49">49th Call</button>
+              <button data-load="planner">PLANNER</button>
+              <button data-load="nilqubit">NIL→QUBIT</button>
+              <button id="corrupt">Corrupt One Char</button>
+            </div>
+          </div>
+          <textarea id="source" spellcheck="false"></textarea>
+        </div>
+
+        <div class="seal-panel">
+          <h2>Spatial Seal</h2>
+          <dl>
+            <div><dt>SHA-256</dt><dd id="hash">...</dd></div>
+            <div><dt>Envelope</dt><dd id="envelope">...</dd></div>
+            <div><dt>Dimensions</dt><dd id="dims">...</dd></div>
+            <div><dt>Corruption</dt><dd id="corruption">clean</dd></div>
+          </dl>
+          <div class="actions vertical">
+            <button id="download-source">Download .tes</button>
+            <button id="download-svg">Download SVG</button>
+            <button id="download-manifest">Download Manifest</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="forge-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Esolang Crypto-Art Forge</p>
+            <h2>Brainfuck, Malbolge, Shakespeare, Chef, LOLCODE, Befunge, Whitespace</h2>
+          </div>
+          <div class="actions">
+            <button data-esolang="brainfuck">Brainfuck</button>
+            <button data-esolang="malbolge">Malbolge</button>
+            <button data-esolang="shakespeare">Shakespeare</button>
+            <button data-esolang="chef">Chef</button>
+            <button data-esolang="lolcat">Cat Code</button>
+            <button data-esolang="befunge">Befunge</button>
+            <button data-esolang="whitespace">Whitespace</button>
+          </div>
+        </div>
+        <div class="forge-grid">
+          <label>Message
+            <input id="forge-message" value="THE ART IS THE SEAL" spellcheck="false">
+          </label>
+          <label>Cipher
+            <select id="cipher">
+              <option value="caesar">Caesar Shift</option>
+              <option value="vigenere">Vigenere</option>
+              <option value="xor">XOR Hex</option>
+              <option value="reverse">Reverse</option>
+              <option value="unicode">Unicode Codepoints</option>
+              <option value="reverse_unicode">Reverse Unicode</option>
+              <option value="magma">MAGMA Seal</option>
+              <option value="macro_strings">Macro Strings</option>
+              <option value="emoji_code">Emoji Code</option>
+            </select>
+          </label>
+          <label>Cipher Key
+            <input id="cipher-key" value="SNAPKITTY" spellcheck="false">
+          </label>
+        </div>
+        <div class="actions">
+          <button id="forge-generate">Generate Esolang Seal</button>
+          <button id="forge-to-tessera">Send To Tessera Editor</button>
+          <button id="download-forge-svg">Download Glowing Seal SVG</button>
+        </div>
+        <div class="forge-output">
+          <article>
+            <h2>Esolang Source</h2>
+            <pre id="esolang-source"></pre>
+          </article>
+          <article>
+            <h2>Cipher / MAGMA Overlay</h2>
+            <pre id="cipher-output"></pre>
+          </article>
+          <article>
+            <h2>Glowing Hash Seal</h2>
+            <div id="glow-seal"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="studio-grid">
+        <article class="panel">
+          <h2>Rendered Tessera</h2>
+          <div id="art"></div>
+        </article>
+        <article class="panel">
+          <h2>Compiled BOB Opcodes</h2>
+          <pre id="compiled"></pre>
+        </article>
+      </section>
+
+      <section class="panel">
+        <h2>NIL → QUBIT Spectrum <span class="eyebrow" style="font-size:0.7rem;margin-left:12px">inverted Abjad weight · ن=50 ي=10 ل=30 → NIL=910</span></h2>
+        <div id="spectrum-panel"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Parser Trace</h2>
+        <pre id="trace"></pre>
+      </section>
+    </main>
+    <script src="studio.js"></script>
+  </body>
+</html>
