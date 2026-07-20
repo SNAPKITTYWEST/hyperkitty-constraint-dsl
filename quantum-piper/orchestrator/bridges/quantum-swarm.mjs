@@ -34,11 +34,11 @@ import {
 
 import {
   qUnit, qBind, qNormalize, qMeasure, subleqGate, sovereignDefaults
-} from '../../../../IdeaProjects/SNAPKITTYWEST/RESONANCE-CORE/lib/math/quantum.mjs'
+} from '../../resonance/quantum.mjs'
 
 import {
   superpositionEntropy, shannonEntropy
-} from '../../../../IdeaProjects/SNAPKITTYWEST/RESONANCE-CORE/lib/math/entropy.mjs'
+} from '../../resonance/entropy.mjs'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const OLLAMA        = 'http://localhost:11434'
