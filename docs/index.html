@@ -1,16 +1,546 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BOB IDE — Vortex Civilization</title>
-  <style>*{margin:0;padding:0;box-sizing:border-box}html,body,#root{height:100%;width:100%;background:#040810;overflow:hidden}</style>
-  <script type="module" crossorigin src="/assets/index-CfBMXSM9.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/monaco-lSU9brYO.js">
-  <link rel="stylesheet" crossorigin href="/assets/monaco-Bwtp0z3V.css">
-  <link rel="stylesheet" crossorigin href="/assets/index-CLrm_1SQ.css">
-<link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOB IDE — Vortex Civilization</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#040810;--bg2:#080f1a;--bg3:#0c1520;
+  --border:#0f2030;--accent:#00d4cc;--purple:#7c3aed;
+  --gold:#ffd700;--green:#00e87a;--red:#f43;
+  --text:#c8e0ec;--text2:#4a6878;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);
+  font-family:'SF Mono','Fira Code','Consolas',monospace;overflow:hidden}
+
+/* TITLEBAR */
+#bar{height:34px;background:var(--bg2);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:8px;flex-shrink:0}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#ff5f57}.dy{background:#febc2e}.dg{background:#28c840}
+#bar-title{flex:1;text-align:center;font-size:11px;color:var(--text2);
+  letter-spacing:2px;text-transform:uppercase}
+.vtab{height:34px;padding:0 14px;background:transparent;border:none;
+  border-bottom:2px solid transparent;color:var(--text2);font-size:11px;
+  font-family:inherit;cursor:pointer;letter-spacing:.5px;text-transform:uppercase}
+.vtab:hover{color:var(--text);background:var(--bg3)}
+.vtab.on{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg3)}
+#hud{display:flex;gap:10px;margin-left:auto;font-size:10px}
+.hi{color:var(--text2)}.hi b{font-size:12px;margin-left:2px}
+
+/* LAYOUT */
+#app{display:flex;height:calc(100vh - 56px)}
+#center{flex:1;min-width:0;position:relative}
+canvas#cv{display:block;width:100%;height:100%;cursor:crosshair}
+
+/* RIGHT PANEL */
+#right{width:260px;flex-shrink:0;background:var(--bg2);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.shdr{height:22px;padding:0 8px;font-size:9px;color:var(--text2);
+  text-transform:uppercase;letter-spacing:1.5px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;background:var(--bg3);flex-shrink:0}
+canvas#mini{width:100%;display:block;flex-shrink:0;border-bottom:1px solid var(--border)}
+#agents{padding:5px 8px;border-bottom:1px solid var(--border);flex-shrink:0}
+.arow{display:flex;align-items:center;gap:5px;padding:2px 0;font-size:10px}
+.adot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.aname{color:var(--text);font-weight:600;width:52px}
+.arole{color:var(--text2);font-size:9px}
+#radio{height:80px;overflow-y:auto;padding:5px 8px;
+  border-bottom:1px solid var(--border);flex-shrink:0}
+#radio::-webkit-scrollbar{width:2px}
+#radio::-webkit-scrollbar-thumb{background:var(--border)}
+.rline{font-size:10px;line-height:1.4;margin-bottom:2px;
+  padding:2px 4px;border-radius:2px;color:var(--text2)}
+.rline.good{color:var(--green);border-left:2px solid var(--green);background:rgba(0,232,122,.03)}
+.rline.bad{color:var(--red);border-left:2px solid var(--red);background:rgba(255,68,51,.04)}
+#chat{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;background:var(--bg)}
+#chat::-webkit-scrollbar{width:2px}
+.cmsg{font-size:11px;line-height:1.55;word-break:break-word;white-space:pre-wrap}
+.cmsg.bot{color:var(--text)}.cmsg.user{color:var(--accent)}
+#cinput-row{display:flex;gap:4px;padding:6px;background:var(--bg2);
+  border-top:1px solid var(--border);flex-shrink:0}
+#cinput{flex:1;background:var(--bg3);border:1px solid var(--border);color:var(--text);
+  padding:5px 7px;font-size:11px;font-family:inherit;border-radius:3px;
+  outline:none;resize:none;height:52px}
+#cinput:focus{border-color:var(--accent)}
+#csend{width:32px;background:var(--accent);border:none;color:#000;
+  font-size:16px;font-weight:900;cursor:pointer;border-radius:3px}
+
+/* STATUSBAR */
+#sbar{height:22px;background:var(--bg2);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 10px;gap:12px;flex-shrink:0;
+  font-size:9px;color:var(--text2)}
+</style>
+</head>
 <body>
-  <div id="root"></div>
+
+<div id="bar">
+  <div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div>
+  <div id="bar-title">BOB IDE — Vortex Civilization</div>
+  <button class="vtab on" id="tab-world" onclick="setView('world')">⬛ World</button>
+  <button class="vtab" id="tab-quantum" onclick="setView('quantum')">⟩ψ Quantum</button>
+  <div id="hud">
+    <span class="hi">HP <b id="h-hp" style="color:#00e87a">100</b></span>
+    <span class="hi">EVD <b id="h-evd" style="color:#00d4cc">0/6</b></span>
+    <span class="hi">SEALS <b id="h-seals" style="color:#ffd700">0</b></span>
+    <span class="hi">COH <b id="h-coh" style="color:#d36bff">0.00</b></span>
+    <span class="hi">FPS <b id="h-fps" style="color:#4a6878">0</b></span>
+  </div>
+</div>
+
+<div id="app">
+  <div id="center">
+    <canvas id="cv"></canvas>
+  </div>
+  <div id="right">
+    <div class="shdr">Map</div>
+    <canvas id="mini" width="260" height="160"></canvas>
+    <div class="shdr">Agents</div>
+    <div id="agents"></div>
+    <div class="shdr">Agent Radio</div>
+    <div id="radio"></div>
+    <div class="shdr" style="justify-content:space-between">
+      <span>BOB Oracle</span>
+      <select id="provider" style="background:var(--bg3);border:none;color:var(--text2);font-size:9px;outline:none;font-family:inherit">
+        <option value="local">Local</option>
+        <option value="openrouter">OpenRouter</option>
+      </select>
+    </div>
+    <div id="chat">
+      <div class="cmsg bot">◆ (boot VORTEX_IDE "civilization engine online")\n\nWASM quantum engine loaded. Walk the world with WASD. Space to pulse. M to seal WORM.</div>
+    </div>
+    <div id="cinput-row">
+      <textarea id="cinput" placeholder="Ask the oracle..."></textarea>
+      <button id="csend">↑</button>
+    </div>
+  </div>
+</div>
+
+<div id="sbar">
+  <span>BLAKE3·WORM</span>
+  <span id="worm-hash" style="color:var(--accent)">GENESIS</span>
+  <span style="margin-left:auto;color:var(--text2)">WASD move · Arrows turn · Space pulse · M seal · Tab switch</span>
+</div>
+
+<!-- Monaco CDN -->
+<script>var require={paths:{vs:'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs'}};</script>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+<script type="module">
+// ── LOAD WASM (S-AUTOCODE pattern) ─────────────────────────────────────
+let SIM = null;
+
+async function loadWasm() {
+  try {
+    const mod = await import('./quantum_wasm.js');
+    await mod.default();
+    // Create simulation: 8 qubits, 16x16 lattice, J=0.4, h=0.2, coupling=0.3, dt=0.01, seed=42
+    SIM = new mod.Simulation(8, 16, 0.4, 0.2, 0.3, 0.01, 42n);
+    say('(wasm QUANTUM_ENGINE "loaded — 44KB compiled from bob_*.f90")', 'good');
+    say(`(sim "8 qubits | 16×16 lattice | Trotter+Josephson")`,'good');
+  } catch(e) {
+    say(`(wasm FAILED "${e.message}" — running JS fallback)`, 'bad');
+    SIM = null;
+  }
+}
+
+// ── QRNG (real OS entropy) ──────────────────────────────────────────────
+function qrng() {
+  const b = new Uint8Array(8);
+  crypto.getRandomValues(b);
+  return (b[0]*0x1000000+b[1]*65536+b[2]*256+b[3]) / 4294967296;
+}
+
+// ── BLAKE3-inspired WORM (same as sov_monster_kernel.f90) ───────────────
+let wormHash = 'GENESIS';
+let wormSeals = 0;
+function seal(evt) {
+  let h = 0x811c9dc5;
+  const s = `${wormHash}|${evt}|${Date.now()}`;
+  for (let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}
+  const rnd = Math.floor(qrng()*0xFFFFFFFF)>>>0;
+  wormHash = (h^rnd).toString(16).padStart(8,'0')+(Math.imul(h,rnd)>>>0).toString(16).padStart(8,'0');
+  wormSeals++;
+  document.getElementById('worm-hash').textContent = wormHash.slice(0,24)+'…';
+  document.getElementById('h-seals').textContent = String(wormSeals);
+  return wormHash;
+}
+
+// ── MAP ─────────────────────────────────────────────────────────────────
+const MAP = [
+  '########################',
+  '#..e......#.....e......#',
+  '#..###....#..######..#.#',
+  '#....#....#.......#..#.#',
+  '#....#..n....e....#....#',
+  '#..#######..#######.####',
+  '#.........a............#',
+  '#.###.#######.#######..#',
+  '#...#.....#.....#......#',
+  '#...#..e..#..f..#..e...#',
+  '###.####..#..####..#####',
+  '#......#.....#.........#',
+  '#..r...#..p..#..c......#',
+  '#......#######......e..#',
+  '####......#......#######',
+  '#..e..b...#...x.......o#',
+  '#.........#............#',
+  '#..######...######..####',
+  '#......#.....#.........#',
+  '#..e...#..v..#...e.....#',
+  '#......#.....#.........#',
+  '#..######..######..##..#',
+  '#......................#',
+  '########################',
+];
+const MW=MAP[0].length, MH=MAP.length;
+const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?'#':MAP[Math.floor(y)][Math.floor(x)];
+const solid=t=>'#nafcpbxr'.includes(t);
+const wallCol=t=>({'#':['#1b3340','#0b151d','#3c7684'],n:['#05363a','#03181b','#00d4cc'],
+  a:['#2b1d05','#120c03','#ffd700'],f:['#3a2107','#140903','#ff8c1a'],
+  c:['#241232','#0d0614','#d36bff'],p:['#173016','#071308','#00ff88'],
+  b:['#302606','#120d02','#ffd700'],x:['#341111','#130606','#ff4444'],
+  r:['#06333a','#031316','#5df7ff']}[t]??['#26333a','#0b1116','#7aa8b4']);
+
+// ── AGENTS ──────────────────────────────────────────────────────────────
+const AGENTS=[
+  {id:'CARTO',role:'Mayor',   c:'#ffd700',x:15.5,y:12.5,msg:'(rule CARTO "Trust Deed — vortex stable")'},
+  {id:'NOVA', role:'Artist',  c:'#d36bff',x:4.5, y:4.5, msg:'(paint NOVA "vortex chronicle sealed")'},
+  {id:'FORGE',role:'Architect',c:'#ff8c1a',x:13.5,y:9.5, msg:'(build FORGE "portal buttress")'},
+  {id:'FLUX', role:'Trader',  c:'#00d4cc',x:7.5, y:15.5,msg:'(trade FLUX "evidence shard — entropy low")'},
+  {id:'PHANTOM',role:'Sheriff',c:'#00ff88',x:10.5,y:12.5,msg:'(audit PHANTOM "no agent acts without evidence")'},
+  {id:'ROBOB',role:'Oracle',  c:'#5df7ff',x:3.5, y:15.5,msg:'(verdict ROBOB "EVIDENCE or SILENCE")'},
+];
+
+// Render agent list
+const agDiv=document.getElementById('agents');
+AGENTS.forEach(ag=>{
+  agDiv.innerHTML+=`<div class="arow">
+    <div class="adot" style="background:${ag.c}"></div>
+    <span class="aname">${ag.id}</span>
+    <span class="arole">${ag.role}</span>
+  </div>`;
+});
+
+// ── GAME STATE ───────────────────────────────────────────────────────────
+const G={
+  px:2.8,py:2.8,pa:0,hp:100,evidence:0,won:false,dead:false,cool:0,tick:0,
+  shards:[],enemies:[
+    {x:19.5,y:4.5,hp:3,alive:true},
+    {x:18.5,y:16.5,hp:3,alive:true},
+    {x:6.5,y:20.5,hp:3,alive:true},
+  ],
+  keys:{},lastT:0,fps:0,frames:0,fpsT:0,
+};
+MAP.forEach((row,y)=>[...row].forEach((c,x)=>{if(c==='e')G.shards.push({x:x+.5,y:y+.5,alive:true});}));
+
+// ── DIALOGUE ─────────────────────────────────────────────────────────────
+const radioEl=document.getElementById('radio');
+function say(text,cls=''){
+  const d=document.createElement('div');
+  d.className='rline '+(cls||'');
+  d.textContent=text;
+  radioEl.prepend(d);
+  while(radioEl.children.length>12)radioEl.removeChild(radioEl.lastChild);
+}
+
+// ── INPUT ────────────────────────────────────────────────────────────────
+window.addEventListener('keydown',e=>{
+  G.keys[e.code]=true;
+  if(e.code==='Space'){e.preventDefault();pulse();}
+  if(e.code==='KeyM')seal('MANUAL');
+  if(e.code==='Tab'){e.preventDefault();setView(currentView==='world'?'quantum':'world');}
+});
+window.addEventListener('keyup',e=>G.keys[e.code]=false);
+
+function pulse(){
+  if(G.cool>0||G.hp<=0)return;
+  G.cool=18;
+  let best=null,bd=999;
+  for(const e of G.enemies)if(e.alive){
+    const dx=e.x-G.px,dy=e.y-G.py,d=Math.hypot(dx,dy);
+    const da=Math.atan2(dy,dx)-G.pa,n=Math.atan2(Math.sin(da),Math.cos(da));
+    if(d<6&&Math.abs(n)<0.26&&d<bd){best=e;bd=d;}
+  }
+  if(best){
+    best.hp--;
+    say(`(pulse ROBOB → SILENCE d=${bd.toFixed(1)})`, 'good');
+    seal('PULSE');
+    if(best.hp<=0){best.alive=false;say('(SILENCE COLLAPSED)','good');}
+  } else {
+    say('(empty corridor)','bad');
+  }
+}
+
+// ── GAME UPDATE ──────────────────────────────────────────────────────────
+function move(dt){
+  const k=G.keys;
+  G.pa+=((k.ArrowLeft?-1:0)+(k.ArrowRight?1:0))*dt*2.3;
+  const f=(k.KeyW||k.ArrowUp?1:0)-(k.KeyS||k.ArrowDown?1:0);
+  const st=(k.KeyD?1:0)-(k.KeyA?1:0);
+  const sp=dt*3.0;
+  const nx=G.px+Math.cos(G.pa)*f*sp+Math.cos(G.pa+Math.PI/2)*st*sp;
+  const ny=G.py+Math.sin(G.pa)*f*sp+Math.sin(G.pa+Math.PI/2)*st*sp;
+  if(!solid(tileAt(nx,G.py)))G.px=nx;
+  if(!solid(tileAt(G.px,ny)))G.py=ny;
+  G.px=Math.max(1.1,Math.min(MW-1.1,G.px));
+  G.py=Math.max(1.1,Math.min(MH-1.1,G.py));
+}
+
+function update(dt){
+  G.tick++;if(G.cool>0)G.cool--;
+
+  // Step quantum simulation
+  if(SIM){
+    SIM.step_n(2);
+  }
+
+  // Get coherence for physics — from WASM or fallback
+  const coh = SIM ? SIM.mean_coherence() : 0.5;
+
+  // Collect shards
+  for(const sh of G.shards)if(sh.alive&&Math.hypot(sh.x-G.px,sh.y-G.py)<0.55){
+    sh.alive=false;G.evidence++;
+    say(`(collect SHARD-${G.evidence})`, 'good');
+    seal('SHARD');
+  }
+
+  // Agent dialogue — Born rule weighted by coherence + proximity
+  for(const ag of AGENTS){
+    const d=Math.hypot(ag.x-G.px,ag.y-G.py);
+    if(Math.random()<coh*(1/(1+d*d))*0.06)say(ag.msg,'good');
+  }
+
+  // Enemies — speed modulated by vortex coherence
+  for(const e of G.enemies)if(e.alive){
+    const d=Math.hypot(e.x-G.px,e.y-G.py);
+    if(d<8){const dx=(G.px-e.x)/d,dy=(G.py-e.y)/d,spd=dt*0.55*(0.5+coh*0.5);
+      const nx=e.x+dx*spd,ny=e.y+dy*spd;
+      if(!solid(tileAt(nx,e.y)))e.x=nx;if(!solid(tileAt(e.x,ny)))e.y=ny;}
+    if(d<0.75){G.hp=Math.max(0,G.hp-dt*18);if(Math.random()<0.02)say('(attack SILENCE)','bad');}
+  }
+
+  if(G.evidence>=6&&!G.won&&Math.hypot(12.5-G.px,19.5-G.py)<1.1){
+    G.won=true;say('(seal TRUST_DEED "VICTORY")','good');seal('VICTORY');
+  }
+  if(G.hp<=0&&!G.dead){G.dead=true;say('(SILENCE — human review)','bad');seal('DEATH');}
+
+  // HUD
+  document.getElementById('h-hp').textContent=Math.ceil(G.hp);
+  document.getElementById('h-hp').style.color=G.hp>50?'#00e87a':G.hp>25?'#fa0':'#f43';
+  document.getElementById('h-evd').textContent=`${G.evidence}/6`;
+  document.getElementById('h-coh').textContent=coh.toFixed(3);
+  document.getElementById('h-fps').textContent=G.fps;
+}
+
+// ── RAYCASTER ────────────────────────────────────────────────────────────
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d',{alpha:false});
+const mini=document.getElementById('mini');
+const mctx=mini.getContext('2d');
+
+function castRay(a){
+  let x=G.px,y=G.py,d=0,t='.';
+  const sin=Math.sin(a),cos=Math.cos(a);
+  while(d<22){x+=cos*.035;y+=sin*.035;d+=.035;t=tileAt(x,y);if(solid(t))break;}
+  return{d,t,x,y};
+}
+
+function getSimCoh(fx, fy) {
+  if(!SIM)return 0.5;
+  try{return SIM.vortex_coherence(Math.floor(fx*16)%16 + Math.floor(fy*16)%16 * 16);}catch{return 0.5;}
+}
+function getSimPhase(fx, fy) {
+  if(!SIM)return 0;
+  try{return SIM.vortex_phase(Math.floor(fx*16)%16 + Math.floor(fy*16)%16 * 16);}catch{return 0;}
+}
+
+function renderWorld(){
+  const W=cv.width,H=cv.height,strip=W>1200?2:3;
+  const sky=ctx.createLinearGradient(0,0,0,H*.52);
+  sky.addColorStop(0,'#020610');sky.addColorStop(.55,'#071827');sky.addColorStop(1,'#10111b');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H/2);
+  const fl=ctx.createLinearGradient(0,H/2,0,H);
+  fl.addColorStop(0,'#090b10');fl.addColorStop(1,'#020204');
+  ctx.fillStyle=fl;ctx.fillRect(0,H/2,W,H/2);
+
+  const fov=Math.PI/3,zbuf=[];
+  for(let x=0;x<W;x+=strip){
+    const a=G.pa-fov/2+(x/W)*fov,r=castRay(a);
+    const cor=r.d*Math.cos(a-G.pa),h=Math.min(H,Math.floor(H/(cor*.62))),top=(H-h)/2;
+    const coh=getSimCoh(r.x/MW,r.y/MH);
+    const ph=getSimPhase(r.x/MW,r.y/MH);
+    const wc=wallCol(r.t),shade=Math.max(.24,1-cor/18)*(0.7+coh*0.3);
+    const side=Math.abs(r.x-Math.round(r.x))<.04?1:0;
+    const bc=(side?wc[1]:wc[2]).match(/\w\w/g).map(v=>parseInt(v,16));
+    const tr=Math.cos(ph)*20,tg=Math.sin(ph)*10;
+    ctx.fillStyle=`rgb(${Math.floor(bc[0]*shade+tr)},${Math.floor(bc[1]*shade+tg)},${Math.floor(bc[2]*shade)})`;
+    ctx.fillRect(x,top,strip+1,h);
+    if(coh>0.75&&'napc'.includes(r.t)){
+      ctx.fillStyle=`rgba(0,212,204,${(coh-.75)*.5+.04*Math.sin(G.tick*.05+x*.02)})`;
+      ctx.fillRect(x,top,strip+1,h);
+    }
+    zbuf[x]=cor;
+  }
+
+  // Sprites
+  const all=[
+    ...G.shards.filter(s=>s.alive).map(s=>({...s,kind:'shard',c:'#00ff88',id:''})),
+    ...AGENTS.map(a=>({...a,kind:'agent'})),
+    ...G.enemies.filter(e=>e.alive).map(e=>({...e,kind:'enemy',c:'#ff4444',id:'SILENCE'})),
+    {x:12.5,y:19.5,kind:'portal',c:'#00d4ff',id:''},
+  ];
+  all.sort((a,b)=>Math.hypot(b.x-G.px,b.y-G.py)-Math.hypot(a.x-G.px,a.y-G.py));
+  for(const sp of all){
+    const dx=sp.x-G.px,dy=sp.y-G.py,dist=Math.hypot(dx,dy);
+    const ang=Math.atan2(dy,dx)-G.pa,norm=Math.atan2(Math.sin(ang),Math.cos(ang));
+    if(Math.abs(norm)>Math.PI/3||dist<.2)continue;
+    const sx=(norm/(Math.PI/3)+.5)*W,sz=Math.min(H*.75,H/(dist*.9)),top=H/2-sz/2;
+    const zi=Math.max(0,Math.min(W-1,Math.floor(sx/3)*3));
+    if(zbuf[zi]&&zbuf[zi]<dist-.25)continue;
+    ctx.save();ctx.globalAlpha=Math.max(.35,1-dist/18);
+    if(sp.kind==='shard'){
+      ctx.fillStyle='#00ff88';ctx.translate(sx,top+sz/2);ctx.rotate(G.tick*.04);
+      ctx.fillRect(-sz*.16,-sz*.16,sz*.32,sz*.32);
+    }else if(sp.kind==='portal'){
+      const p=1+Math.sin(G.tick*.07)*.12;
+      ctx.strokeStyle='#00d4ff';ctx.lineWidth=5;ctx.shadowColor='#00d4ff';ctx.shadowBlur=25;
+      ctx.beginPath();ctx.ellipse(sx,top+sz/2,sz*.32*p,sz*.48*p,0,0,Math.PI*2);ctx.stroke();
+      ctx.fillStyle='#000';ctx.beginPath();ctx.ellipse(sx,top+sz/2,sz*.18,sz*.28,0,0,Math.PI*2);ctx.fill();
+    }else{
+      ctx.shadowColor=sp.c;ctx.shadowBlur=16;ctx.fillStyle=sp.c;
+      ctx.fillRect(sx-sz*.25,top+sz*.22,sz*.5,sz*.58);
+      ctx.beginPath();ctx.arc(sx,top+sz*.18,sz*.18,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=sp.kind==='enemy'?'#220000':'#020204';
+      ctx.fillRect(sx-sz*.09,top+sz*.15,sz*.05,sz*.04);
+      ctx.fillRect(sx+sz*.04,top+sz*.15,sz*.05,sz*.04);
+      ctx.fillStyle=sp.c;ctx.font=`bold ${Math.max(9,sz*.09)}px monospace`;
+      ctx.textAlign='center';ctx.fillText(sp.id||'',sx,top+sz*.92);
+    }
+    ctx.restore();
+  }
+  // Crosshair
+  ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(W/2-14,H/2);ctx.lineTo(W/2+14,H/2);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W/2,H/2-14);ctx.lineTo(W/2,H/2+14);ctx.stroke();
+  if(G.won){ctx.fillStyle='rgba(0,255,136,.15)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffd700';ctx.font='bold 34px monospace';ctx.textAlign='center';
+    ctx.fillText('KITTYVERSE TRUST DEED SEALED',W/2,H/2);}
+  if(G.hp<=0){ctx.fillStyle='rgba(255,0,0,.25)';ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#f43';ctx.font='bold 34px monospace';ctx.textAlign='center';
+    ctx.fillText('SILENCE — HUMAN REVIEW REQUIRED',W/2,H/2);}
+}
+
+function renderMini(){
+  const W=mini.width,H=mini.height,sw=W/MW,sh=H/MH;
+  mctx.clearRect(0,0,W,H);
+  for(let y=0;y<MH;y++)for(let x=0;x<MW;x++){
+    const t=MAP[y][x];
+    if(solid(t)){mctx.fillStyle=wallCol(t)[2];mctx.fillRect(x*sw,y*sh,sw,sh);}
+    else{
+      let coh=0.5;
+      if(SIM){try{coh=SIM.vortex_coherence((x%16)+(y%16)*16);}catch{}}
+      mctx.fillStyle=`hsl(${200+coh*60},70%,${8+coh*12}%)`;mctx.fillRect(x*sw,y*sh,sw,sh);
+    }
+  }
+  G.shards.filter(s=>s.alive).forEach(s=>{mctx.fillStyle='#00ff88';mctx.fillRect((s.x-.1)*sw,(s.y-.1)*sh,sw*.2,sh*.2);});
+  AGENTS.forEach(a=>{mctx.fillStyle=a.c;mctx.beginPath();mctx.arc(a.x*sw,a.y*sh,sw*.28,0,Math.PI*2);mctx.fill();});
+  G.enemies.filter(e=>e.alive).forEach(e=>{mctx.fillStyle='#f43';mctx.beginPath();mctx.arc(e.x*sw,e.y*sh,sw*.22,0,Math.PI*2);mctx.fill();});
+  mctx.strokeStyle='#ffd700';mctx.lineWidth=1;
+  mctx.beginPath();mctx.arc(G.px*sw,G.py*sh,sw*.35,0,Math.PI*2);mctx.stroke();
+  mctx.beginPath();mctx.moveTo(G.px*sw,G.py*sh);mctx.lineTo((G.px+Math.cos(G.pa)*1.2)*sw,(G.py+Math.sin(G.pa)*1.2)*sh);mctx.stroke();
+}
+
+// ── QUANTUM VIEW ─────────────────────────────────────────────────────────
+let currentView='world';
+window.setView=function(v){
+  currentView=v;
+  ['world','quantum'].forEach(k=>{document.getElementById('tab-'+k).classList.toggle('on',k===v);});
+  cv.style.display=v==='world'?'block':'none';
+};
+
+function renderQuantum(){
+  if(currentView!=='quantum'||!SIM)return;
+  const W=cv.clientWidth||800,H=cv.clientHeight||600;
+  cv.width=W;cv.height=H;cv.style.display='block';
+  const n=16,cw=W/n,ch=H/n;
+  for(let i=0;i<n*n;i++){
+    const ix=i%n,iy=Math.floor(i/n);
+    let ph=0,coh=0.5,wind=0;
+    try{ph=SIM.vortex_phase(i);coh=SIM.vortex_coherence(i);wind=SIM.vortex_winding(i);}catch{}
+    const hue=(ph/(2*Math.PI)*360)|0;
+    const lum=(15+coh*30)|0;
+    ctx.fillStyle=`hsl(${hue},85%,${lum}%)`;
+    ctx.fillRect(ix*cw,iy*ch,cw,ch);
+    if(wind!==0){
+      ctx.strokeStyle=wind>0?'rgba(0,212,204,.7)':'rgba(255,60,60,.7)';
+      ctx.lineWidth=1;ctx.beginPath();ctx.arc(ix*cw+cw/2,iy*ch+ch/2,Math.min(cw,ch)*.3,0,Math.PI*2);ctx.stroke();
+    }
+  }
+}
+
+// ── CHAT ─────────────────────────────────────────────────────────────────
+const chatEl=document.getElementById('chat');
+function chatAppend(role,text){
+  const d=document.createElement('div');
+  d.className='cmsg '+role;
+  d.textContent=(role==='bot'?'◆ ':'❯ ')+text;
+  chatEl.appendChild(d);
+  chatEl.scrollTop=chatEl.scrollHeight;
+}
+
+document.getElementById('csend').onclick=sendChat;
+document.getElementById('cinput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();sendChat();}
+});
+
+async function sendChat(){
+  const inp=document.getElementById('cinput');
+  const text=inp.value.trim();if(!text)return;
+  inp.value='';chatAppend('user',text);
+  const prov=document.getElementById('provider').value;
+  if(prov==='openrouter'){
+    const key=localStorage.getItem('or_key')||prompt('OpenRouter API key:');
+    if(key){localStorage.setItem('or_key',key);
+      try{
+        const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+          method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+          body:JSON.stringify({model:'anthropic/claude-3-haiku',messages:[
+            {role:'system',content:'You are BOB, oracle of the Kittyverse sovereign civilization. Concise, technical, sovereign.'},
+            {role:'user',content:text}
+          ]})
+        });
+        const j=await r.json();
+        chatAppend('bot',j.choices?.[0]?.message?.content||'(no response)');
+      }catch(e){chatAppend('bot','Error: '+e.message);}
+    }
+  }else{
+    const coh=SIM?SIM.mean_coherence().toFixed(3):'?';
+    const topo=SIM?SIM.topological_charge():0;
+    chatAppend('bot',`coherence=${coh} topo=${topo} seals=${wormSeals}\n\nVortex engine running. Set OpenRouter for full AI responses.`);
+  }
+}
+
+// ── MAIN LOOP ────────────────────────────────────────────────────────────
+function resize(){cv.width=cv.offsetWidth||800;cv.height=cv.offsetHeight||600;}
+window.addEventListener('resize',resize);resize();
+
+function loop(now){
+  requestAnimationFrame(loop);
+  const dt=Math.min(.05,(now-(G.lastT||now))/1000);G.lastT=now;
+  G.frames++;if(now-G.fpsT>1000){G.fps=G.frames;G.frames=0;G.fpsT=now;}
+  move(dt);update(dt);
+  if(currentView==='world')renderWorld();
+  else renderQuantum();
+  renderMini();
+}
+
+// ── BOOT ─────────────────────────────────────────────────────────────────
+await loadWasm();
+seal('BOOT');
+requestAnimationFrame(loop);
+</script>
 </body>
 </html>
