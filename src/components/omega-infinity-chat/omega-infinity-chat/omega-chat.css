@@ -1,0 +1,432 @@
+:root {
+  --omega-bg: #020608;
+  --omega-panel: rgba(4, 13, 18, .92);
+  --omega-panel-2: rgba(2, 22, 26, .78);
+  --omega-line: rgba(76, 255, 216, .18);
+  --omega-cyan: #59f5ff;
+  --omega-green: #65ffc1;
+  --omega-blue: #5c84ff;
+  --omega-violet: #b179ff;
+  --omega-red: #ff5577;
+  --omega-text: #d8fff7;
+  --omega-muted: #719b98;
+  --omega-glow: 0 0 18px rgba(89, 245, 255, .24);
+  --omega-radius: 22px;
+  --omega-font: "IBM Plex Mono", "SFMono-Regular", "Cascadia Code", Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(40, 113, 138, .24), transparent 40%),
+    radial-gradient(circle at 85% 90%, rgba(57, 255, 177, .09), transparent 36%),
+    linear-gradient(180deg, #010304, var(--omega-bg));
+  color: var(--omega-text);
+  font-family: var(--omega-font);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .32;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.012) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(circle, #000 40%, transparent 92%);
+}
+
+.ide-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: minmax(260px, 1fr) minmax(430px, 58vh);
+  gap: 12px;
+  padding: 12px;
+}
+
+.editor-ghost {
+  border: 1px solid rgba(89,245,255,.09);
+  border-radius: 18px;
+  background: rgba(1,5,7,.62);
+  padding: 24px;
+  color: rgba(118, 170, 169, .42);
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.editor-line { margin: 0 0 9px; }
+
+omega-infinity-chat { min-height: 0; display: block; }
+
+.omega-chat {
+  position: relative;
+  height: 100%;
+  min-height: 420px;
+  overflow: hidden;
+  border: 1px solid rgba(93, 255, 218, .25);
+  border-radius: var(--omega-radius);
+  background:
+    linear-gradient(140deg, rgba(8, 28, 34, .95), rgba(2, 7, 10, .97) 48%, rgba(7, 18, 24, .94));
+  box-shadow:
+    0 -12px 70px rgba(20, 210, 200, .08),
+    inset 0 1px rgba(255,255,255,.04),
+    0 0 0 1px rgba(0,0,0,.6);
+  isolation: isolate;
+}
+
+.omega-chat::before,
+.omega-chat::after {
+  content: "";
+  position: absolute;
+  inset: -45%;
+  z-index: -2;
+  pointer-events: none;
+  background: conic-gradient(
+    from 20deg,
+    transparent 0 25%,
+    rgba(84,255,219,.11) 31%,
+    transparent 39% 62%,
+    rgba(96,114,255,.10) 69%,
+    transparent 77%
+  );
+  animation: omega-orbit 18s linear infinite;
+}
+
+.omega-chat::after {
+  inset: 0;
+  z-index: 8;
+  opacity: .16;
+  background: repeating-linear-gradient(
+    180deg,
+    transparent 0 3px,
+    rgba(111,255,229,.08) 4px,
+    transparent 5px
+  );
+  mix-blend-mode: screen;
+  animation: scan-drift 7s linear infinite;
+}
+
+@keyframes omega-orbit { to { transform: rotate(360deg) scale(1.06); } }
+@keyframes scan-drift { to { transform: translateY(12px); } }
+@keyframes pulse { 50% { opacity: .45; transform: scale(.82); } }
+@keyframes breathe {
+  50% { box-shadow: 0 0 28px rgba(89,245,255,.33), inset 0 0 22px rgba(89,245,255,.05); }
+}
+@keyframes shimmer { to { background-position: 200% 0; } }
+
+.omega-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 250px 1fr;
+}
+
+.omega-rail {
+  min-width: 0;
+  padding: 16px;
+  border-right: 1px solid var(--omega-line);
+  background: linear-gradient(180deg, rgba(5,18,23,.88), rgba(1,8,11,.65));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.omega-mark {
+  font-size: 18px;
+  letter-spacing: .18em;
+  font-weight: 800;
+  color: var(--omega-cyan);
+  text-shadow: 0 0 18px rgba(89,245,255,.52);
+}
+
+.omega-submark {
+  margin-top: -8px;
+  font-size: 10px;
+  color: var(--omega-muted);
+  letter-spacing: .12em;
+}
+
+.omega-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--omega-muted);
+}
+
+.omega-dot {
+  width: 8px; height: 8px; border-radius: 999px;
+  background: var(--omega-red);
+  box-shadow: 0 0 12px currentColor;
+}
+.omega-dot[data-state="open"] { background: var(--omega-green); animation: pulse 1.5s infinite; }
+.omega-dot[data-state="connecting"] { background: #ffd166; animation: pulse .8s infinite; }
+
+.omega-section-title {
+  font-size: 10px;
+  color: #7faaa7;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.omega-models { display: grid; gap: 7px; }
+
+.omega-model {
+  appearance: none;
+  border: 1px solid rgba(89,245,255,.12);
+  border-radius: 12px;
+  background: rgba(0,0,0,.16);
+  color: var(--omega-muted);
+  font: inherit;
+  font-size: 11px;
+  padding: 10px 11px;
+  text-align: left;
+  cursor: pointer;
+}
+.omega-model[aria-pressed="true"] {
+  color: var(--omega-text);
+  border-color: rgba(89,245,255,.5);
+  background: linear-gradient(90deg, rgba(89,245,255,.10), rgba(101,255,193,.05));
+  box-shadow: var(--omega-glow);
+}
+
+.omega-meter {
+  margin-top: auto;
+  border: 1px solid rgba(89,245,255,.12);
+  border-radius: 14px;
+  padding: 11px;
+  background: rgba(0,0,0,.18);
+}
+
+.omega-meter-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--omega-muted);
+  margin-bottom: 8px;
+}
+
+.omega-meter-bar {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255,255,255,.05);
+}
+.omega-meter-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--omega-blue), var(--omega-cyan), var(--omega-green));
+  box-shadow: 0 0 13px rgba(89,245,255,.5);
+  transition: width .35s ease;
+}
+
+.omega-main {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.omega-topbar {
+  min-height: 58px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--omega-line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.omega-title {
+  font-size: 12px;
+  letter-spacing: .14em;
+  color: #9fd7d1;
+}
+.omega-title strong { color: var(--omega-cyan); }
+
+.omega-pills {
+  margin-left: auto;
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.omega-pill {
+  border: 1px solid rgba(89,245,255,.15);
+  border-radius: 999px;
+  padding: 5px 8px;
+  font-size: 9px;
+  color: var(--omega-muted);
+  background: rgba(0,0,0,.22);
+}
+.omega-pill.hot { color: var(--omega-green); border-color: rgba(101,255,193,.34); }
+
+.omega-log {
+  min-height: 0;
+  overflow: auto;
+  padding: 18px 18px 36px;
+  scroll-behavior: smooth;
+}
+
+.omega-log::-webkit-scrollbar { width: 10px; }
+.omega-log::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  background: rgba(89,245,255,.18);
+  background-clip: padding-box;
+  border-radius: 99px;
+}
+
+.omega-message {
+  width: min(860px, 94%);
+  margin-bottom: 14px;
+  border: 1px solid rgba(89,245,255,.10);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(3,12,16,.72);
+  box-shadow: inset 0 1px rgba(255,255,255,.025);
+}
+
+.omega-message.user {
+  margin-left: auto;
+  border-color: rgba(91,132,255,.25);
+  background: linear-gradient(135deg, rgba(64,83,168,.17), rgba(4,12,18,.76));
+}
+
+.omega-message.assistant {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.omega-message.error { border-color: rgba(255,85,119,.38); }
+
+.omega-message-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+  font-size: 9px;
+  letter-spacing: .13em;
+  color: var(--omega-muted);
+  text-transform: uppercase;
+}
+
+.omega-message-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+.omega-thinking {
+  margin: 8px 0;
+  border-left: 2px solid var(--omega-violet);
+  border-radius: 0 12px 12px 0;
+  padding: 10px 12px;
+  color: #b9b6d9;
+  background:
+    linear-gradient(90deg, rgba(177,121,255,.10), transparent),
+    linear-gradient(90deg, transparent, rgba(89,245,255,.06), transparent);
+  background-size: auto, 200% 100%;
+  animation: shimmer 3.5s linear infinite;
+}
+
+.omega-thinking summary {
+  cursor: pointer;
+  color: #cbb8ff;
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.omega-code {
+  margin: 10px 0 0;
+  overflow: auto;
+  border: 1px solid rgba(89,245,255,.14);
+  border-radius: 13px;
+  background: #010608;
+  padding: 12px;
+  color: #b9efe6;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.omega-code .kw { color: #76a5ff; }
+.omega-code .reg { color: #68ffd0; }
+.omega-code .num { color: #ffcc83; }
+.omega-code .comment { color: #597b79; font-style: italic; }
+
+.omega-compose {
+  position: relative;
+  z-index: 9;
+  border-top: 1px solid var(--omega-line);
+  padding: 12px;
+  background: rgba(2,9,12,.92);
+}
+
+.omega-input-shell {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: end;
+  border: 1px solid rgba(89,245,255,.22);
+  border-radius: 16px;
+  padding: 9px 10px;
+  background: rgba(0,0,0,.27);
+  box-shadow: inset 0 0 22px rgba(89,245,255,.025);
+}
+
+.omega-sigil {
+  align-self: center;
+  color: var(--omega-green);
+  text-shadow: 0 0 16px rgba(101,255,193,.7);
+}
+
+.omega-input {
+  width: 100%;
+  min-height: 24px;
+  max-height: 150px;
+  resize: none;
+  overflow: auto;
+  outline: none;
+  border: 0;
+  background: transparent;
+  color: var(--omega-text);
+  font: inherit;
+  line-height: 1.5;
+}
+.omega-input::placeholder { color: #53716f; }
+
+.omega-send {
+  border: 1px solid rgba(101,255,193,.3);
+  border-radius: 12px;
+  min-width: 82px;
+  padding: 10px 13px;
+  background: linear-gradient(135deg, rgba(101,255,193,.16), rgba(89,245,255,.08));
+  color: var(--omega-green);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: .12em;
+  cursor: pointer;
+}
+.omega-send:hover { box-shadow: 0 0 20px rgba(101,255,193,.20); }
+.omega-send:disabled { opacity: .45; cursor: not-allowed; }
+
+.omega-foot {
+  margin-top: 7px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: #557673;
+  font-size: 9px;
+}
+
+@media (max-width: 760px) {
+  .ide-shell { grid-template-rows: 180px minmax(520px, 1fr); }
+  .omega-layout { grid-template-columns: 1fr; }
+  .omega-rail { display: none; }
+  .omega-pills { display: none; }
+}

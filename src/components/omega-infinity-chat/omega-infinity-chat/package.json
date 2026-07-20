@@ -1,0 +1,11 @@
+{
+  "name": "omega-infinity-chat",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "serve:ws": "node server.example.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
