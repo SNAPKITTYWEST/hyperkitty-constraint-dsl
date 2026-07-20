@@ -2,12 +2,20 @@ import { useEffect, useState } from 'react';
 import { AppShell } from './components/shell/AppShell';
 import { Welcome } from './pages/Welcome';
 import { useWorkspaceStore } from './stores/workspace.store';
+import { sovereignIDE } from '../artifacts/SOVEREIGN_IDE_FRAMEWORK';
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [sovereignReady, setSovereignReady] = useState(false);
   const { workspaceId, initialize } = useWorkspaceStore();
 
   useEffect(() => {
+    // Initialize Sovereign IDE framework (all BOB components)
+    sovereignIDE.initialize().then(() => {
+      setSovereignReady(true);
+      console.log('✅ Sovereign IDE Framework loaded');
+    });
+
     // Initialize stores and check for existing workspace
     initialize().finally(() => setIsLoading(false));
   }, [initialize]);
