@@ -1,25 +1,22 @@
-# BOB - Sovereign Compliance Agent for UiPath
+# BOB — Sovereign Compliance Agent
 
-> UiPath AgentHack 2026, Track 1: Maestro Case<br>
 > Evidence or Silence. Nothing in between.
 
-[![AgentHack](https://img.shields.io/badge/UiPath-AgentHack_2026-ff6d00?style=for-the-badge)](https://uipath-agenthack.devpost.com/)
-[![Track](https://img.shields.io/badge/Track-Maestro_Case-00ff88?style=for-the-badge)](#uipath-components-used)
-[![Runtime](https://img.shields.io/badge/Runtime-Node.js_20-111?style=for-the-badge&logo=node.js)](#run-bob)
-[![LLM](https://img.shields.io/badge/LLM-Bedrock_Claude_Sonnet_4.6-111?style=for-the-badge)](#what-bob-does)
-[![Audit](https://img.shields.io/badge/Audit-SHA--256_WORM-00ff88?style=for-the-badge)](#formal-guarantees)
+[![Runtime](https://img.shields.io/badge/Runtime-Node.js_20-111?style=for-the-badge&logo=node.js)](https://nodejs.org/)
+[![LLM](https://img.shields.io/badge/LLM-Bedrock_Claude_Sonnet_4.6-5A4FCF?style=for-the-badge)](https://aws.amazon.com/bedrock/)
+[![Audit](https://img.shields.io/badge/Audit-Blake3_WORM-00ff88?style=for-the-badge)](#formal-guarantees)
+[![Attestation](https://img.shields.io/badge/Attestation-Bifrost_WORM_v2026-ff6d00?style=for-the-badge)](#trust-deed-v10)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue?style=for-the-badge)](LICENSE)
 
-## Start Here
+## Navigation
 
-| Need | Link |
+| | |
 |---|---|
-| See the live submission page | [snapkittywest.github.io/bob-hackathon-demo](https://snapkittywest.github.io/bob-hackathon-demo/) |
 | Run BOB locally | [Run BOB](#run-bob) |
-| Understand the architecture | [Architecture](#architecture) |
-| Copy Devpost text | [Submission copy](#submission-copy) |
-| See formal guarantees | [Formal guarantees](#formal-guarantees) |
-| Review UiPath pieces | [UiPath components used](#uipath-components-used) |
+| Architecture | [Architecture](#architecture) |
+| Formal guarantees | [Formal guarantees](#formal-guarantees) |
+| UiPath integration | [UiPath components](#uipath-components) |
+| Sovereign infra | [../infra/](../infra/) |
 
 ## What BOB Does
 
@@ -36,8 +33,8 @@ A UiPath Robot submits a document or compliance query. BOB evaluates it under th
 }
 ```
 
-- `EVIDENCE` -> UiPath may continue the workflow.
-- `SILENCE` -> UiPath routes the case to human review.
+- `EVIDENCE` — UiPath may continue the workflow.
+- `SILENCE` — UiPath routes the case to human review.
 - Every verdict is sealed with `SHA256(verdict:score:query:timestamp)`.
 
 ## Architecture
@@ -90,14 +87,14 @@ UiPath -> POST /api/validate on Phoenix :4000
 
 </details>
 
-## UiPath Components Used
+## UiPath Components
 
-- **UiPath Studio / Studio Web**: workflow authoring.
-- **UiPath Robot**: executes the document validation process.
-- **Track 1 Maestro Case pattern**: dynamic case routing with exception paths.
-- **Human review queue**: receives every `SILENCE` verdict.
-- **HTTP integration**: calls `POST localhost:7474/validate`.
-- **Optional ABZU bridge**: Phoenix `/api/validate` endpoint routes through NATS.
+- **UiPath Studio / Studio Web** — workflow authoring.
+- **UiPath Robot** — executes the document validation process.
+- **Track 1 Maestro Case pattern** — dynamic case routing with exception paths.
+- **Human review queue** — receives every `SILENCE` verdict.
+- **HTTP integration** — calls `POST localhost:7474/validate`.
+- **Optional ABZU bridge** — Phoenix `/api/validate` endpoint routes through NATS.
 
 ## Run BOB
 
@@ -120,11 +117,7 @@ npm install
 npm run validate
 ```
 
-BOB starts on:
-
-```text
-http://localhost:7474
-```
+BOB starts on `http://localhost:7474`.
 
 ### Health check
 
@@ -137,10 +130,10 @@ curl http://localhost:7474/health
 ```bash
 curl -X POST http://localhost:7474/validate \
   -H "Content-Type: application/json" \
-  -d "{\"query\":\"Invoice INV-1001 from approved vendor ACME for $450 with invoice ID and amount present.\"}"
+  -d '{"query":"Invoice INV-1001 from approved vendor ACME for $450 with invoice ID and amount present."}'
 ```
 
-### Expected response shape
+### Response shape
 
 ```json
 {
@@ -171,11 +164,7 @@ curl -X POST http://localhost:7474/validate \
 - HTTP: `POST localhost:7474/validate`
 - NATS: `snapkitty.agents.operator`
 
-Every successful validation publishes a sealed verdict to:
-
-```text
-snapkitty.bifrost.sealed
-```
+Every successful validation publishes a sealed verdict to `snapkitty.bifrost.sealed`.
 
 </details>
 
@@ -208,8 +197,7 @@ Key runtime rules:
 
 ## Formal Guarantees
 
-<details open>
-<summary><strong>Verdict Completeness</strong></summary>
+**Verdict Completeness**
 
 ```text
 For every submitted document packet d,
@@ -220,8 +208,6 @@ BOB(d) returns exactly one verdict:
 
 There is no third state.
 ```
-
-</details>
 
 <details>
 <summary><strong>WORM Integrity</strong></summary>
@@ -273,58 +259,12 @@ collapse to SILENCE.
 
 </details>
 
-## Demo Script
-
-Use this for the 5-minute Devpost video.
-
-1. Start BOB with `npm run validate`.
-2. Show `/health`.
-3. In UiPath, submit a compliant invoice/query.
-4. Show `EVIDENCE`, score, reasoning, and SHA-256 seal.
-5. Submit an unknown vendor or incomplete document.
-6. Show `SILENCE`.
-7. Show the workflow path to human review.
-8. Show NATS/Discord/Telegram event feed if available.
-9. Explain that Claude Code was used as the coding agent for the build.
-
-## Submission Copy
-
-<details>
-<summary><strong>Copy/paste Devpost Inspiration</strong></summary>
-
-We built BOB in one day for UiPath AgentHack 2026. The idea was simple: every enterprise AI agent makes decisions, but almost none of them can prove what happened afterward.
-
-When an AI approves an invoice, routes a compliance case, or escalates a vendor exception, the audit record needs more than a transcript. It needs a governed verdict, a human-in-loop path, and tamper evidence.
-
-BOB fixes that with one rule: Evidence or Silence. Nothing in between.
-
-</details>
-
-<details>
-<summary><strong>Copy/paste What it does</strong></summary>
-
-A UiPath Robot submits a document or compliance query. BOB evaluates it under the Bel Esprit D'Accord Trust Deed v1.0, a six-article governing charter, then calls Claude Sonnet 4.6 through AWS Bedrock.
-
-If the score is at or above 0.42, BOB returns EVIDENCE and UiPath may continue. If evidence is weak, the vendor is unknown, fields are missing, or the model cannot ground the answer, BOB returns SILENCE and the workflow routes to human review.
-
-Every verdict is sealed with SHA-256. Tamper with the verdict, score, query, or timestamp and the seal breaks.
-
-</details>
-
-<details>
-<summary><strong>Copy/paste What's next</strong></summary>
-
-Next for BOB: a full Maestro Case for invoice-to-payment, UiPath Document Understanding for OCR ingestion, a public Trust Deed registry, an ABZU LiveView dashboard for verdict monitoring, and expanded alert routing for Telegram and Discord.
-
-</details>
-
 ## Repositories
 
 | Purpose | Repository |
 |---|---|
 | BOB source | [SNAPKITTYWEST/bob-orchestrator](https://github.com/SNAPKITTYWEST/bob-orchestrator) |
-| Public submission site | [SNAPKITTYWEST/bob-hackathon-demo](https://github.com/SNAPKITTYWEST/bob-hackathon-demo) |
-| Submission page | [snapkittywest.github.io/bob-hackathon-demo](https://snapkittywest.github.io/bob-hackathon-demo/) |
+| IDE + frontend | [SNAPKITTYWEST/bob-ide](https://github.com/SNAPKITTYWEST/bob-ide) |
 | ABZU bridge | [SNAPKITTYWEST/abzu-sovereign-ide](https://github.com/SNAPKITTYWEST/abzu-sovereign-ide) |
 
 ## License
