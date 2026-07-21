@@ -3,15 +3,17 @@
 
 :- use_module(library(process)).
 
-% ---- Key Registry ----
-% Replace values with actual Ed25519 key fingerprints post-provisioning.
-architect_key('ARCHITECT_ED25519_FINGERPRINT').
-engineer_key('ENG_01_ED25519_FINGERPRINT').
-engineer_key('ENG_02_ED25519_FINGERPRINT').
-engineer_key('ENG_03_ED25519_FINGERPRINT').
-engineer_key('ENG_04_ED25519_FINGERPRINT').
-engineer_key('ENG_05_ED25519_FINGERPRINT').
-ci_bot_key('HAUKI_BOT_ED25519_FINGERPRINT').
+% ---- Key Registry (MOCK) ----
+% These are deterministic test fingerprints — safe to commit.
+% Replace with real Ed25519 fingerprints after running provision/sov-bootstrap.yml
+% and reading the audit output. NEVER commit real private keys.
+architect_key('mock:arch:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC').
+engineer_key('mock:eng1:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF').
+engineer_key('mock:eng2:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0').
+engineer_key('mock:eng3:CD:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01').
+engineer_key('mock:eng4:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12').
+engineer_key('mock:eng5:EF:01:23:45:67:89:AB:CD:EF:01:23:45:67:89:AB:CD:EF:01:23').
+ci_bot_key('mock:hauki:F0:12:34:56:78:9A:BC:DE:F0:12:34:56:78:9A:BC:DE:F0:12:34').
 
 authorized_key(K) :- architect_key(K).
 authorized_key(K) :- engineer_key(K).
