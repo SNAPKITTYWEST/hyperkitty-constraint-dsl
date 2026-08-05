@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Minimal FormalConstraintDSL example.
+  Copy this, fill in your domains, and define your constraints.
+  Run through the XSLT engine to generate executable targets:
+    xsltproc xslt/polyglot-codegen.xsl examples/minimal.xml
+-->
+<FormalConstraintDSL version="1.0">
+
+  <Meta>
+    <System>YOUR_SYSTEM_NAME</System>
+    <Mode>DETERMINISTIC-CONSTRAINT-BUILD</Mode>
+    <Output>PROOF_BACKED_ARTIFACT</Output>
+    <TruthPolicy>STATIC_DECLARATION_ONLY NO_FAKE_RUNTIME_STATE</TruthPolicy>
+  </Meta>
+
+  <Domains>
+    <DomainSet id="A">Agent1 Agent2 Agent3</DomainSet>
+    <ForbiddenSet id="F">FakeTelemetry UndefinedState</ForbiddenSet>
+    <StateSet>
+      <Valid>Running Idle</Valid>
+      <Invalid>Zombie Deadlock</Invalid>
+    </StateSet>
+  </Domains>
+
+  <BooleanKernel>
+    <Primitive name="NAND"><![CDATA[NAND(a,b) = 1 - ab]]></Primitive>
+    <Derived name="NOT">NAND(a,a)</Derived>
+    <Derived name="AND">NAND(NAND(a,b), NAND(a,b))</Derived>
+    <Derived name="IMPLIES">NAND(NAND(NOT(a),NOT(a)), NAND(b,b))</Derived>
+  </BooleanKernel>
+
+  <AgentModel>
+    <Agent>
+      <Field name="id"      type="String"/>
+      <Field name="entropy" refinement="entropy &lt;= 0.20"/>
+      <Field name="active"  type="Boolean"/>
+      <Field name="trusted" type="Boolean"/>
+    </Agent>
+    <Invariant>active(a) =&gt; trusted(a)</Invariant>
+    <Invariant>entropy(a) &lt;= 0.20</Invariant>
+  </AgentModel>
+
+  <ValidityPredicate name="V">
+    <Rule><![CDATA[
+      V(message) = 1 IFF:
+        entropy(message) <= 0.20
+        AND proof(message) = true
+        AND active(sender) => trusted(sender)
+    ]]></Rule>
+  </ValidityPredicate>
+
+  <Pipeline>
+    <Phase id="1">DefineConstraints</Phase>
+    <Phase id="2">ValidateAgainstSpec</Phase>
+    <Phase id="3">GenerateProofArtifact</Phase>
+    <Constraint>Phase(n+1) requires Complete(Phase n)</Constraint>
+  </Pipeline>
+
+</FormalConstraintDSL>
