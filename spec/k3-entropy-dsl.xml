@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HyperKittyConstraintDSL version="1.0">
+  <Meta><System>HK-OS</System><Mode>DETERMINISTIC-CONSTRAINT-BUILD</Mode>
+    <Output>PROOF_BACKED_ARTIFACT</Output>
+    <TruthPolicy>STATIC_DECLARATION_ONLY NO_FAKE_RUNTIME_STATE</TruthPolicy>
+  </Meta>
+  <BooleanKernel>
+    <Primitive name="NAND"><![CDATA[NAND(a,b)=1-ab]]></Primitive>
+    <Derived name="NOT">NAND(x,x)</Derived>
+    <Derived name="AND">NAND(NAND(a,b),NAND(a,b))</Derived>
+    <Derived name="OR">NAND(NAND(a,a),NAND(b,b))</Derived>
+    <Derived name="IMPLIES">OR(NOT(a),b)</Derived>
+  </BooleanKernel>
+  <GlyphTypeSystem>
+    <Unit symbol="Fortran" name="Fortran"/>
+    <Unit symbol="Janet"   name="Janet"/>
+    <Unit symbol="Coq"     name="Coq"/>
+    <Unit symbol="C"       name="C"/>
+    <Unit symbol="Verified" name="Verified"/>
+  </GlyphTypeSystem>
+  <AgentModel>
+    <Agent>
+      <Field name="id" type="String"/>
+      <Field name="role" type="GlyphUnit"/>
+      <Field name="entropy" refinement="entropy=0"/>
+      <Field name="trusted" type="Boolean"/>
+      <Field name="active" type="Boolean"/>
+    </Agent>
+    <Invariant>active(a)=&gt;trusted(a)</Invariant>
+    <Invariant>entropy(a)=0</Invariant>
+  </AgentModel>
+  <DAG>
+    <Node id="hol_k3_kernel"/>
+    <Node id="ocaml_k3_checker"/>
+    <Node id="static_lib_k3"/>
+    <Node id="forge_integration_k3"/>
+    <Edge from="hol_k3_kernel" to="ocaml_k3_checker"/>
+    <Edge from="ocaml_k3_checker" to="static_lib_k3"/>
+    <Edge from="static_lib_k3" to="forge_integration_k3"/>
+  </DAG>
+  <QuantumConstraintLayer>
+    <Entropy><Metric>Shannon_Nats</Metric><Bound>0.20</Bound></Entropy>
+    <Routing>K3 surface entropy = 0.831... &gt; 0.20 -- VIOLATION CONFIRMED</Routing>
+  </QuantumConstraintLayer>
+  <K3Result>
+    <HodgeNumbers total="24">
+      <h p="0" q="0">1</h><h p="1" q="0">0</h><h p="0" q="1">0</h>
+      <h p="2" q="0">1</h><h p="1" q="1">20</h><h p="0" q="2">1</h>
+      <h p="2" q="1">0</h><h p="1" q="2">0</h><h p="2" q="2">1</h>
+    </HodgeNumbers>
+    <Entropy>0.8314284057732047</Entropy>
+    <BoundViolation>true</BoundViolation>
+    <ProvenBy>HOL Light -- hol/k3_entropy.ml</ProvenBy>
+    <ExtractedConstant>k3_entropy_violates_bound = true</ExtractedConstant>
+  </K3Result>
+</HyperKittyConstraintDSL>
