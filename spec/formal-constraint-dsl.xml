@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FormalConstraintDSL v1.0
+  The reusable constraint-first specification language.
+  Extracted from HyperKitty development, 2026-08-02.
+
+  Core idea: instead of prompting an agent "build X", define:
+  - allowed universe
+  - forbidden states
+  - invariants
+  - transformations
+  - proof requirements
+
+  The agent becomes a compiler/executor against a formal contract.
+
+  Pattern:
+    DOMAIN DEFINITIONS -> BOOLEAN ALGEBRA -> REFINEMENT TYPES
+    -> DAG TOPOLOGY -> TRANSFORMATION RULES -> VALIDATION/PROOF -> OUTPUT
+-->
+
+<FormalConstraintDSL version="1.0">
+
+  <!-- 1. Domain Declaration -->
+  <Domains>
+    <DomainSet id="A">
+      <!-- Components, Services, Agents, Modules, Resources -->
+    </DomainSet>
+    <LayerSet id="L">
+      <!-- Ordering, Ownership, Visibility, ExecutionLayers -->
+    </LayerSet>
+    <TechnologySet id="T">
+      <!-- AllowedTechnologies -->
+    </TechnologySet>
+    <ForbiddenSet id="F">
+      <!-- ForbiddenTechnologies, ForbiddenBehaviors, InvalidStates -->
+    </ForbiddenSet>
+    <StateSet>
+      <!-- ValidStates, FailureStates, RecoveryStates -->
+    </StateSet>
+  </Domains>
+
+  <!-- 2. Boolean Constraint Kernel -->
+  <BooleanKernel>
+    <Primitive name="NAND"><![CDATA[NAND(a,b) = NOT(AND(a,b)) = 1 - ab]]></Primitive>
+    <Derived name="NOT">NAND(a,a)</Derived>
+    <Derived name="AND">NAND(NAND(a,b), NAND(a,b))</Derived>
+    <Derived name="OR">NAND(NAND(a,a), NAND(b,b))</Derived>
+    <Derived name="IMPLIES">OR(NOT(a), b)</Derived>
+    <Derived name="EQUAL">AND(IMPLIES(a,b), IMPLIES(b,a))</Derived>
+    <Derived name="ALL">recursive AND over x1...xn</Derived>
+    <Derived name="ANY">recursive OR over x1...xn</Derived>
+  </BooleanKernel>
+
+  <!-- 3. Technology Constraints -->
+  <TechnologyRules>
+    <Rule>FOR_ALL(t IN ForbiddenSet): USED(t) = 0</Rule>
+    <Rule>REQUIRED(x) = 1</Rule>
+    <Rule>OPTIONAL(x) = 1</Rule>
+    <Rule>USED(x) IMPLIES Bound(x)</Rule>
+  </TechnologyRules>
+
+  <!-- 4. Canonical Structure -->
+  <Structure>
+    <Order>Root, ChildLayers, Components, Controls</Order>
+    <ElementRequirements>
+      <Requires>Parent</Requires>
+      <Requires>Position</Requires>
+      <Requires>Ownership</Requires>
+      <Requires>Identity</Requires>
+    </ElementRequirements>
+  </Structure>
+
+  <!-- 5. Component Contract -->
+  <ComponentModel>
+    <ForAll name="component">
+      <Requires>State</Requires>
+      <Requires>Input</Requires>
+      <Requires>Output</Requires>
+      <Requires>ErrorState</Requires>
+      <Requires>Recovery</Requires>
+      <Requires>Identity</Requires>
+    </ForAll>
+    <Forbidden>DecorativeOnly(component) = TRUE</Forbidden>
+  </ComponentModel>
+
+  <!-- 6. Refinement Type Layer -->
+  <RefinementTypes>
+    <TypeSchema>
+      <Type name="T">x:T | Predicate(x)</Type>
+      <Example name="Resource">usage:Float | usage &lt;= threshold</Example>
+      <Example name="Agent">active:Boolean, trusted:Boolean | active =&gt; trusted</Example>
+    </TypeSchema>
+  </RefinementTypes>
+
+  <!-- 7. DAG Topology -->
+  <DAG>
+    <Flow>Node -> Transform -> Validator -> Output</Flow>
+    <EdgeRequirements>
+      <Requires>Source</Requires>
+      <Requires>Destination</Requires>
+      <Requires>Constraint</Requires>
+    </EdgeRequirements>
+  </DAG>
+
+  <!-- 8. Transformation Engine -->
+  <Transformation>
+    <Input>StructuredState</Input>
+    <Process>
+      <Step>TemplateMatch</Step>
+      <Step>Rewrite</Step>
+      <Step>Validate</Step>
+      <Step>Commit</Step>
+    </Process>
+    <Output>NewState</Output>
+  </Transformation>
+
+  <!-- 9. Truth Constraints -->
+  <TruthLayer>
+    <Rule>StaticState MUST declare Static</Rule>
+    <Rule>LiveState MUST have RuntimeSource</Rule>
+    <Rule>FakeState = INVALID</Rule>
+  </TruthLayer>
+
+  <!-- 10. Proof Artifact -->
+  <Proof>
+    <ProofRecord>
+      <Field>InputHash</Field>
+      <Field>SchemaHash</Field>
+      <Field>RuleHash</Field>
+      <Field>TransformHash</Field>
+      <Field>Result</Field>
+    </ProofRecord>
+  </Proof>
+
+  <!-- 11. Execution Pipeline -->
+  <Pipeline>
+    <Phase id="1">Audit</Phase>
+    <Phase id="2">FreezeSchema</Phase>
+    <Phase id="3">FreezeStructure</Phase>
+    <Phase id="4">FreezeRules</Phase>
+    <Phase id="5">Implement</Phase>
+    <Phase id="6">Validate</Phase>
+    <Phase id="7">Transform</Phase>
+    <Phase id="8">Deploy</Phase>
+    <Constraint>Phase(n+1) requires Complete(Phase n)</Constraint>
+  </Pipeline>
+
+  <!-- 12. Acceptance Function -->
+  <Objective>
+    <Score>Structure + Functionality + Truth + Integration + Verification + Accessibility + Deployment</Score>
+    <Rule>InvalidConstraint IMPLIES RejectBuild</Rule>
+  </Objective>
+
+</FormalConstraintDSL>
