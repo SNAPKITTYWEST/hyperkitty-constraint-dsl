@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HyperKittyConstraintDSL version="1.0">
+  <Meta>
+    <System>HK-OS</System>
+    <Mode>DETERMINISTIC-CONSTRAINT-BUILD</Mode>
+    <Output>PROOF_BACKED_ARTIFACT</Output>
+    <TruthPolicy>STATIC_DECLARATION_ONLY NO_FAKE_RUNTIME_STATE</TruthPolicy>
+  </Meta>
+
+  <BooleanKernel>
+    <Primitive name="NAND"><![CDATA[NAND(a,b) = 1 - a*b]]></Primitive>
+    <Derived name="NOT">NAND(x,x)</Derived>
+    <Derived name="AND">NAND(NAND(a,b), NAND(a,b))</Derived>
+    <Derived name="OR">NAND(NAND(a,a), NAND(b,b))</Derived>
+    <Derived name="IMPLIES">OR(NOT(a), b)</Derived>
+    <Derived name="EQUAL">AND(IMPLIES(a,b), IMPLIES(b,a))</Derived>
+    <Derived name="XOR">AND(OR(a,b), NOT(AND(a,b)))</Derived>
+  </BooleanKernel>
+
+  <GlyphTypeSystem>
+    <Unit symbol="StateSpace"          name="StateSpace"/>
+    <Unit symbol="LedgerLog"           name="LedgerLog"/>
+    <Unit symbol="TransitionQuery"     name="TransitionQuery"/>
+    <Unit symbol="InvariantConstraint" name="InvariantConstraint"/>
+    <Unit symbol="StateTransform"      name="StateTransform"/>
+    <Unit symbol="ConservedQuantity"   name="ConservedQuantity"/>
+    <Unit symbol="ValidityProof"       name="ValidityProof"/>
+    <Unit symbol="ReconciliationInterface" name="ReconciliationInterface"/>
+  </GlyphTypeSystem>
+
+  <AgentModel>
+    <Agent>
+      <Field name="id"      type="String"/>
+      <Field name="role"    type="GlyphUnit"/>
+      <Field name="entropy" refinement="0 &lt;= entropy &lt;= 0.20"/>
+      <Field name="trusted" type="Boolean"/>
+      <Field name="active"  type="Boolean"/>
+    </Agent>
+    <Invariant>active(agent) =&gt; trusted(agent)</Invariant>
+    <Invariant>entropy(agent) &lt;= 0.20</Invariant>
+  </AgentModel>
+
+  <DAG>
+    <Node id="StateSpace"/>
+    <Node id="LedgerLog"/>
+    <Node id="TransitionQuery"/>
+    <Node id="StateTransform"/>
+    <Node id="InvariantConstraint"/>
+    <Node id="ConservedQuantity"/>
+    <Node id="ValidityProof"/>
+    <Node id="ReconciliationInterface"/>
+    <Edge from="StateSpace"          to="LedgerLog"/>
+    <Edge from="LedgerLog"           to="TransitionQuery"/>
+    <Edge from="TransitionQuery"     to="StateTransform"/>
+    <Edge from="StateTransform"      to="InvariantConstraint"/>
+    <Edge from="InvariantConstraint" to="ConservedQuantity"/>
+    <Edge from="ConservedQuantity"   to="ValidityProof"/>
+    <Edge from="ValidityProof"       to="ReconciliationInterface"/>
+  </DAG>
+
+  <TransformationEngine>
+    <Template language="XSLT">
+      <Rule><![CDATA[
+        INPUT_STATE: U_t = (S_t, L_t, C_t)
+        APPLY_TEMPLATE: T_{e_i}(S_t) -> S_{t+1}
+        GENERATE_CANDIDATE: l_i = (S_t, e_i, S_{t+1}, tau_i)
+        VALIDATE_CONSTRAINTS:
+          I(S_t) == I(S_{t+1}) AND
+          dA + dE == dL + dR AND
+          V(l_i) == 1
+        HASH_OUTPUT: SHA3-256(l_i || L_t)
+      ]]></Rule>
+    </Template>
+    <Multiplicity>
+      <Expansion>candidates = transform(agent_state, n)</Expansion>
+      <Constraint>accept(c) = entropy(c) &lt;= 0.20 AND proof(c) = true</Constraint>
+    </Multiplicity>
+  </TransformationEngine>
+
+  <QuantumConstraintLayer>
+    <Operator>
+      <Name>SymmetricOperator</Name>
+      <Rule>Q = (Q + transpose(Q))/2</Rule>
+    </Operator>
+    <Entropy>
+      <Metric>Shannon_Nats</Metric>
+      <Formula>H = -sum(p ln p)</Formula>
+      <Bound>H &lt;= 0.20</Bound>
+    </Entropy>
+    <Routing>Reject states violating entropy constraint.</Routing>
+  </QuantumConstraintLayer>
+
+  <StateModel name="UniverseLedger">
+    <Component name="S_t" type="SystemState">
+      <Field name="conserved"   type="Map_Resource_Quantity"/>
+      <Field name="energy"      type="Quantity"/>
+      <Field name="obligations" type="Map_Commitment_Quantity"/>
+      <Field name="released"    type="Map_Output_Quantity"/>
+    </Component>
+    <Component name="L_t" type="LedgerLog">
+      <Field name="entries" type="List_JournalEntry"/>
+      <Invariant>entries ordered by tau_i</Invariant>
+    </Component>
+    <Component name="C_t" type="ConstraintSet">
+      <Field name="invariants"        type="List_InvariantFunction"/>
+      <Field name="conservation_laws" type="List_ConservationLaw"/>
+    </Component>
+  </StateModel>
+
+  <TransitionModel>
+    <Event name="e_i" type="TransitionEvent">
+      <Field name="delta_A" type="Quantity"/>
+      <Field name="delta_E" type="Quantity"/>
+      <Field name="delta_L" type="Quantity"/>
+      <Field name="delta_R" type="Quantity"/>
+      <Field name="tau"     type="Timestamp"/>
+    </Event>
+    <Transform name="T_ei">
+      <Precondition>V(l_i) = 1</Precondition>
+      <Postcondition>
+        S_{t+1}.conserved   = S_t.conserved   + dA
+        S_{t+1}.energy      = S_t.energy      + dE
+        S_{t+1}.obligations = S_t.obligations + dL
+        S_{t+1}.released    = S_t.released    + dR
+      </Postcondition>
+    </Transform>
+  </TransitionModel>
+
+  <InvariantLayer>
+    <Invariant name="AccountingBalance">
+      <Formula>dA + dE = dL + dR</Formula>
+    </Invariant>
+    <Invariant name="StateInvariant">
+      <Formula>I(S_t) = I(S_{t+1})</Formula>
+    </Invariant>
+    <Invariant name="ConservationLaw">
+      <Formula>forall q in ConservedQuantities: q(S_t) == q(S_{t+1})</Formula>
+    </Invariant>
+  </InvariantLayer>
+
+  <ValidityPredicate name="V">
+    <Signature>JournalEntry -&gt; Boolean</Signature>
+    <Rule><![CDATA[
+      V(l_i) = 1 IFF:
+        (dA + dE == dL + dR) AND
+        (forall f in C_t: f(S_t) == f(S_{t+1})) AND
+        (entropy(l_i) <= 0.20) AND
+        (proof(l_i) == true)
+    ]]></Rule>
+  </ValidityPredicate>
+
+  <Algorithm name="UniverseLedgerStep">
+    <Step id="1">S_t --T_{e_i}--> S_{t+1}</Step>
+    <Step id="2">S_{t+1} --Record--> l_i = (S_t, e_i, S_{t+1}, tau_i)</Step>
+    <Step id="3">L_{t+1} = L_t union {l_i}</Step>
+    <Step id="4">V(l_i) ? Valid : Invalid</Step>
+    <Step id="5">Valid -&gt; Reconcile(L_{t+1}) -&gt; Commit</Step>
+  </Algorithm>
+
+  <ProofOutput>
+    <Required>RepositoryAudit SchemaHash RuleHash TransformHash ConstraintGraph ValidationResult ArtifactHash</Required>
+  </ProofOutput>
+
+  <ReconciliationProtocol>
+    <Phase name="Audit">     <Action>Verify all l_i in L_t satisfy V(l_i) = 1</Action></Phase>
+    <Phase name="Balance">   <Action>Sum(dA) + Sum(dE) == Sum(dL) + Sum(dR) over L_t</Action></Phase>
+    <Phase name="Invariant"> <Action>forall f in C_t: f(S_0) == f(S_t)</Action></Phase>
+    <Phase name="Commit">    <Action>Hash(L_t) -&gt; WORM_Chain</Action></Phase>
+  </ReconciliationProtocol>
+</HyperKittyConstraintDSL>
