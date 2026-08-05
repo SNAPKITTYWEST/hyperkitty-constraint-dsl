@@ -1,0 +1,266 @@
+HYPER KITTY CONSTRAINT PROGRAM
+SYSTEM: HK-OS
+VERSION: 6
+EXECUTION: DETERMINISTIC-CONSTRAINT-BUILD
+ORIGIN: 2026-08-02 (Meta AI on phone via Termux)
+
+========================================================
+1. DOMAINS
+========================================================
+
+A = {
+  HyperKitty, Quark, Nova, Proof, Memory, Knowledge,
+  Workflows, Models, Artifacts, QuantumLab, Ledger, SystemMonitor
+}
+
+L = {
+  MenuBar, Desktop, Wallpaper, DesktopIcons, WindowLayer,
+  Dock, PopoverLayer, SheetLayer, ModalLayer
+}
+
+T = { XML, XSLT, HTML, CSS, SVG, VanillaJS, C99, Swift, SwiftUI }
+
+F = {
+  TypeScript, TSX, JSX, React, NextJS, Tailwind,
+  npm, node_modules, CDN, RemoteFonts, FakeTelemetry
+}
+
+STATE = {
+  StaticPreview, Disconnected, Connecting,
+  Connected, Degraded, FailedSafe
+}
+
+BOOLEAN = {0,1}
+
+========================================================
+2. LOGICAL PRIMITIVE
+========================================================
+
+NAND(a,b) := 1 - ab
+NOT(a) := NAND(a,a)
+AND(a,b) := NAND(NAND(a,b), NAND(a,b))
+OR(a,b)  := NAND(NAND(a,a), NAND(b,b))
+IMPLIES(a,b) := OR(NOT(a),b)
+EQUAL(a,b)   := AND(IMPLIES(a,b), IMPLIES(b,a))
+ALL(x1,...,xn) := AND(x1, AND(x2,...,xn))
+ANY(x1,...,xn) := OR(x1, OR(x2,...,xn))
+
+========================================================
+3. TECHNOLOGY CONSTRAINTS
+========================================================
+
+forall t in F: USED(t) = 0
+
+REQUIRED(XML) = REQUIRED(XSLT) = REQUIRED(HTML) = 1
+REQUIRED(CSS) = REQUIRED(SVG)  = REQUIRED(C99)  = 1
+
+OPTIONAL(VanillaJS) = OPTIONAL(Swift) = OPTIONAL(SwiftUI) = 1
+
+USED(VanillaJS) => SIZE(VanillaJS) <= 50 KiB
+USED(SwiftUI)   => EXTERNAL_SWIFT_PACKAGES = 0
+
+========================================================
+4. CANONICAL LAYOUT ORDER
+========================================================
+
+ORDER = [
+  MenuBar,
+  Desktop[
+    Wallpaper, DesktopIcons, WindowLayer,
+    PopoverLayer, SheetLayer, ModalLayer, Dock
+  ]
+]
+
+INDEX(MenuBar) < INDEX(Desktop)
+
+Z(Wallpaper)    = 0
+Z(DesktopIcons) = 10
+Z(WindowLayer)  >= 100
+Z(Dock)         = 500
+Z(PopoverLayer) = 700
+Z(SheetLayer)   = 800
+Z(ModalLayer)   = 900
+Z(MenuBar)      = 1000
+
+forall w in OPEN_WINDOWS:
+  Z(w) assigned by WindowManager
+  FOCUS(w) => Z(w) = max({Z(v): v in OPEN_WINDOWS, v != w}) + 1
+
+========================================================
+5. DESKTOP APPLICATION MODEL
+========================================================
+
+forall a in A:
+  EXISTS(Window(a))          = 1
+  EXISTS(LauncherEntry(a))   = 1
+  EXISTS(OpenState(a))       = 1
+  EXISTS(EmptyState(a))      = 1
+  EXISTS(ErrorState(a))      = 1
+  EXISTS(CloseAction(a))     = 1
+  EXISTS(MinimizeAction(a))  = 1
+  EXISTS(RestoreAction(a))   = 1
+  EXISTS(AccessibleName(a))  = 1
+  DECORATIVE_ICON_ONLY(a)    = 0
+
+AGENT(Quark) = NativeExecution  -> COLOR = Violet
+AGENT(Nova)  = HumanInteraction -> COLOR = Cyan
+AGENT(Proof) = Verification     -> COLOR = Emerald
+
+========================================================
+6. WINDOW GEOMETRY
+========================================================
+
+VIEWPORT_WIDTH = W, VIEWPORT_HEIGHT = H
+MENU_HEIGHT = 28
+
+DEFAULT_WINDOW_WIDTH  := min(1180, max(680, 0.72W))
+DEFAULT_WINDOW_HEIGHT := min(820,  max(460, 0.76H))
+DEFAULT_X := (W - DEFAULT_WINDOW_WIDTH) / 2
+DEFAULT_Y := MENU_HEIGHT + (H - MENU_HEIGHT - DEFAULT_WINDOW_HEIGHT) / 2
+
+INLINE_WINDOW_GEOMETRY = 0
+
+forall w:
+  X(w) >= 0
+  Y(w) >= MENU_HEIGHT
+  X(w) + WIDTH(w)  <= W
+  Y(w) + HEIGHT(w) <= H
+
+========================================================
+7. COMPACTNESS CONSTRAINTS
+========================================================
+
+8px <= SECTION_PADDING <= 12px
+8px <= CARD_RADIUS <= 12px
+26px <= ROW_HEIGHT <= 30px
+12px <= BODY_FONT_SIZE <= 14px
+10px <= META_FONT_SIZE <= 12px
+
+SIDEBAR_WIDTH    = 176px
+INSPECTOR_WIDTH  = 236px
+CONTENT_WIDTH   := WINDOW_WIDTH - 176 - 236
+CONTENT_WIDTH   >= 520px
+
+SIDEBAR_WIDTH + INSPECTOR_WIDTH <= 0.42 * WINDOW_WIDTH
+
+CONTENT_WIDTH < 520px    => INSPECTOR_VISIBLE = 0
+CONTENT_WIDTH < 520px    => SIDEBAR_COLLAPSED = 1 (without inspector)
+
+========================================================
+8. DOCK CONSTRAINTS
+========================================================
+
+PRIMARY_DOCK = { HyperKitty, Quark, Nova, Proof, Workflows, Artifacts, SystemMonitor }
+|PRIMARY_DOCK| <= 7
+
+forall a in (A - PRIMARY_DOCK):
+  ACCESSIBLE_FROM(a, ApplicationLauncher) = 1
+  ACCESSIBLE_FROM(a, CommandPalette)      = 1
+
+DOCK_ICON_SIZE in [36px, 44px]
+DOCK_WIDTH <= 0.72W
+
+========================================================
+9. STATE TRUTH
+========================================================
+
+PUBLIC_GITHUB_PAGES = 1 => RUNTIME_STATE = StaticPreview
+RUNTIME_STATE = StaticPreview => DISPLAY("STATIC SYSTEM PREVIEW") = 1
+RUNTIME_STATE = StaticPreview => DISPLAY("Runtime: Connected") = 0
+STATIC_VALUE(metric)  => LABEL in {DemoData, SnapshotData, ArchitectureExample}
+LIVE_VALUE(metric)    => EXISTS(RuntimeEventSource(metric)) = 1
+FAKE_TELEMETRY = 0
+
+========================================================
+10. XML/XSLT CONTRACT
+========================================================
+
+ROOT(index.xml) = HyperKitty
+VALIDATE(index.xml, schema.xsd)   = 1
+TRANSFORM(index.xml, hyperkitty.xsl) = index.html
+TRANSFORM_DETERMINISTIC = 1
+RUN_TRANSFORM_TWICE => HASH(output_1) = HASH(output_2)
+README_SOURCE = system.xml
+SITE_SOURCE   = system.xml
+DUPLICATED_MANUAL_STATUS_TABLES = 0
+
+========================================================
+11. RESPONSIVE RULES
+========================================================
+
+W >= 1280:  FloatingDesktop, SIDEBAR=1, INSPECTOR=1
+1024<=W<1280: FloatingDesktop, SIDEBAR=1, INSPECTOR=0
+700<=W<1024:  MaximizedApplication, SIDEBAR_COLLAPSED=1
+W < 700:    SingleApplication, FLOATING_WINDOWS=0, MENU_BAR=0, DOCK=BottomNavigation
+
+========================================================
+12. ACCESSIBILITY INVARIANTS
+========================================================
+
+forall control:        HAS_ACCESSIBLE_NAME(control) = 1
+forall interactive:    KEYBOARD_REACHABLE = 1
+forall dialog:         FOCUS_TRAPPED = 1, FOCUS_RESTORED_ON_CLOSE = 1
+COLOR_ONLY_STATE       = 0
+REDUCED_MOTION         = 1
+FOCUS_INDICATOR        = 1
+HEADING_ORDER_VALID    = 1
+DUPLICATE_IDS          = 0
+
+========================================================
+13. FATAL VIOLATIONS
+========================================================
+
+V_FATAL := USED(TypeScript) OR USED(React) OR USED(NextJS)
+        OR USED(Tailwind) OR USED(npm) OR USED(RemoteFonts)
+        OR FAKE_TELEMETRY OR INVALID_XML OR INVALID_XSLT
+        OR INVALID_CSS OR BROKEN_ASSET_PATHS
+        OR DECORATIVE_APPLICATIONS OR DEPLOY_BEFORE_TESTS
+
+V_FATAL = 1 => ACCEPT_BUILD = 0
+
+========================================================
+14. OBJECTIVE FUNCTION
+========================================================
+
+SOLUTION_SCORE :=
+  100*C_STRUCTURE + 90*C_FUNCTIONALITY + 90*C_TRUTH
++ 85*C_INTEGRATION + 80*C_RESPONSIVE + 75*C_ACCESSIBILITY
++ 70*C_COMPACTNESS + 60*C_DEPLOYMENT + 50*C_VISUAL
+- 1000000*V_FATAL
+
+ACCEPT_BUILD = 1 iff:
+  V_FATAL = 0
+  AND C_STRUCTURE = C_FUNCTIONALITY = C_TRUTH = 1
+  AND C_INTEGRATION = C_RESPONSIVE = C_ACCESSIBILITY = 1
+  AND C_DEPLOYMENT = 1
+  AND SOLUTION_SCORE >= 650
+
+========================================================
+15. EXECUTION ORDER
+========================================================
+
+PHASE_1=AuditRepository      -> PHASE_2=FreezeCanonicalSchema
+PHASE_3=FreezeDOMOrder        -> PHASE_4=FreezeDesignTokens
+PHASE_5=ImplementWindowManager -> PHASE_6=ImplementApplications
+PHASE_7=IntegrateXML_XSLT     -> PHASE_8=ValidateHTML_CSS_JS
+PHASE_9=TestResponsiveStates  -> PHASE_10=GenerateStaticOutput
+PHASE_11=ReviewDiff           -> PHASE_12=Deploy
+PHASE_13=VerifyPublicURL
+
+forall i: COMPLETE(PHASE_i) = 1 before START(PHASE_{i+1}) = 1
+
+========================================================
+16. REQUIRED PROOF OUTPUT
+========================================================
+
+RETURN {
+  RepositoryAudit, FilesPreserved, FilesRemoved,
+  FilesCreated, FilesModified, XMLValidation,
+  XSLTValidation, CSSValidation,
+  ApplicationBehaviorTests, ResponsiveTests,
+  AccessibilityTests, DeploymentResult,
+  PublicURLVerification, RemainingLimitations,
+  ArtifactHashes
+}
+
+DO NOT CLAIM COMPLETE unless: ACCEPT_BUILD = 1
