@@ -1,0 +1,10 @@
+(library
+ (name forge_kernel_k3)
+ (public_name forge_kernel_k3)
+ (modules k3_checker)
+ (modes native))
+
+(executable
+ (name test_k3)
+ (modules test_k3)
+ (libraries forge_kernel_k3))
