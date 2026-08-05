@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Web application constraint specification using FormalConstraintDSL.
+  Based on the HK-OS v6 constraint program (spec/hk-os-v6-constraint.txt).
+  Demonstrates: technology constraints, layout invariants, truth layer.
+-->
+<FormalConstraintDSL version="1.0">
+  <Meta>
+    <System>WEB_APP</System>
+    <Mode>DETERMINISTIC-CONSTRAINT-BUILD</Mode>
+    <Output>PROOF_BACKED_ARTIFACT</Output>
+    <TruthPolicy>STATIC_DECLARATION_ONLY NO_FAKE_RUNTIME_STATE</TruthPolicy>
+  </Meta>
+
+  <Domains>
+    <TechnologySet id="T">HTML CSS VanillaJS</TechnologySet>
+    <ForbiddenSet id="F">React TypeScript npm FakeTelemetry</ForbiddenSet>
+    <StateSet>
+      <Valid>Static Live</Valid>
+      <Invalid>Fake</Invalid>
+    </StateSet>
+  </Domains>
+
+  <BooleanKernel>
+    <Primitive name="NAND"><![CDATA[NAND(a,b) = 1 - ab]]></Primitive>
+    <Derived name="NOT">NAND(a,a)</Derived>
+    <Derived name="AND">NAND(NAND(a,b), NAND(a,b))</Derived>
+    <Derived name="IMPLIES">OR(NOT(a), b)</Derived>
+  </BooleanKernel>
+
+  <TruthLayer>
+    <Rule>StaticState MUST declare Static</Rule>
+    <Rule>LiveState MUST have RuntimeSource</Rule>
+    <Rule>FakeState = INVALID</Rule>
+  </TruthLayer>
+
+  <ValidityPredicate name="V">
+    <Rule><![CDATA[
+      V(build) = 1 IFF:
+        NOT(USED(ForbiddenTech))
+        AND truth_state_valid(build)
+        AND no_fake_telemetry(build)
+        AND all_controls_implemented(build)
+    ]]></Rule>
+  </ValidityPredicate>
+
+  <FatalViolations>
+    <Violation>USED(React) = true</Violation>
+    <Violation>FAKE_TELEMETRY = true</Violation>
+    <Violation>STATIC_VALUE labeled as LIVE</Violation>
+  </FatalViolations>
+
+</FormalConstraintDSL>
