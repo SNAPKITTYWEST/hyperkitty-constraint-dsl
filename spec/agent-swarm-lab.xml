@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  AgentSwarmLab v1.0
+  Sent to Meta AI on phone, 2026-08-02 ~13:54 (second prompt in chain)
+  2000-node distributed reasoning simulation specification.
+-->
+<AgentSwarmLab version="1.0">
+  <Cluster>
+    <Nodes count="2000"/>
+    <Purpose>DistributedReasoningSimulation</Purpose>
+    <Environment>Sandbox</Environment>
+  </Cluster>
+</AgentSwarmLab>
