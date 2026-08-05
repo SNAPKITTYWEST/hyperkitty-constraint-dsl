@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SnapKittyRuntime v1.0
+  The very first prompt sent to Meta AI on phone, 2026-08-02 ~13:52
+  This XML specification created the genesis of HyperKitty.
+  Meta AI conversation: https://www.meta.ai/share/a/9ea88539-f3ec-48f3-ae18-6d5368185768
+  (file: hyper_kitty_sovereign_ai.html was generated from this)
+-->
+<SnapKittyRuntime>
+  <Access>
+    <Mode>Private_Source</Mode>
+    <Authority>Owner_Controlled</Authority>
+    <Deployment>Self_Hosted</Deployment>
+  </Access>
+
+  <AgentFabric>
+    <Planner/>
+    <Reasoner/>
+    <Verifier/>
+    <Executor>
+      <Policy>Owner_Defined</Policy>
+    </Executor>
+    <Monitor/>
+  </AgentFabric>
+
+  <Knowledge>
+    <MemoryStore/>
+    <GraphIndex/>
+    <ArtifactRegistry/>
+  </Knowledge>
+
+  <Governance>
+    <PermissionChecks/>
+    <AuditTrail/>
+    <Rollback/>
+    <VersionControl/>
+  </Governance>
+</SnapKittyRuntime>
