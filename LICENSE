@@ -1,15 +1,97 @@
 Business Source License 1.1
 
-Licensor:      SNAPKITTYWEST (Bel Esprit D'Accord Irrevocable Trust)
-Licensed Work: HyperKitty Constraint DSL
-               spec/ hol/ ocaml/ bh-mechanics/ xslt/
+Licensor:       Ahmad Parr (SNAPKITTYWEST)
+                Bel Esprit D'Accord Irrevocable Trust
 
-Change Date:    2029-01-01
+Licensed Work:  HyperKitty Constraint DSL
+                The Licensed Work is (C) 2026 Ahmad Parr / SNAPKITTYWEST.
+                The Licensed Work includes all files in this repository:
+                spec/, hol/, ocaml/, bh-mechanics/, xslt/, ui/
+
+Change Date:    January 1, 2029
+
 Change License: MIT License
 
-Grant of Rights:
-  Non-production use: freely permitted.
-  Production use for own applications: freely permitted.
-  Cannot resell as competing commercial constraint verification product.
+Grant of Rights
 
-THE LICENSED WORK IS PROVIDED AS IS. NO WARRANTIES.
+Subject to the terms and conditions of this License, the Licensor
+grants you the right to copy, modify, create derivative works,
+redistribute, and make non-production use of the Licensed Work.
+
+The Licensor also grants you the right to make production use of
+the Licensed Work, provided that the following conditions are met:
+
+  1. You do not offer the Licensed Work to third parties as a hosted
+     or embedded basis in order to compete with any commercial
+     offering of the Licensor.
+
+  2. You do not incorporate the following Protected Inventions into
+     a commercial product or service without a separate written
+     commercial license from the Licensor:
+
+     PROTECTED INVENTIONS:
+
+     a) NAND-Complete Constraint Kernel for Agent Routing
+        — The use of NAND(a,b) = 1 - ab as the universal primitive
+          from which all routing constraints are derived, applied to
+          deterministic agent message routing systems.
+
+     b) Entropy-Gated Agent State Machine
+        — The H <= 0.20 nats constraint as a hard architectural
+          invariant rejecting non-deterministic agent states, combined
+          with the validity predicate V(l_i) = 1 requiring both
+          entropy compliance and proof certification.
+
+     c) Constraint-First Agent Specification Language
+        — The methodology of defining the constraint universe, forbidden
+          states, invariants, transformations, and proof requirements
+          BEFORE implementation, causing the agent to compile against a
+          formal contract rather than interpret a natural language prompt.
+
+     d) XML-AST Three-Swarm Reverse Engineering Protocol
+        — The UNIVERSE-RECLAIM architecture: three parallel agents
+          (ARCHAEOLOGIST, METAMORPH, VALIDATOR) operating under a shared
+          evidence ledger, shared constraint schema, and shared acceptance
+          gates to invert and rebuild source systems from XML-AST.
+
+     e) QLG-Certified JWT with Living Token Evolution
+        — Embedding Quadratic Ledger Geometry routing certificates in
+          JWT payloads, with witness vectors that evolve via the QRA
+          tensor on each authentication event, bounding token lifetime
+          by algebraic exhaustion.
+
+     f) Tripartite Routing Isomorphism
+        — The formal correspondence K_QLG = omega_SLA = target_QRA
+          proved in Lean 4, establishing that geometric routing (integer
+          unit sphere), algebraic routing (double-entry ledger), and
+          automaton routing (6x6 tensor) are three representations of
+          the same mathematical object.
+
+On the Change Date, the Licensor grants you rights under the terms
+of the Change License (MIT), and these rights will not be
+restricted by this License.
+
+Additional Notes
+
+If you use this work in academic research, please cite:
+
+  Ahmad Parr, SNAPKITTYWEST. "A Formal Constraint DSL for
+  Deterministic Agent Systems." arXiv preprint, August 2026.
+  https://github.com/SNAPKITTYWEST/hyperkitty-constraint-dsl
+
+The Lean 4 formal proofs in the companion repository
+(SNAPKITTYWEST/hyperkitty) are licensed separately under
+the same BSL 1.1 terms.
+
+Disclaimer
+
+THE LICENSED WORK IS PROVIDED "AS IS". THE LICENSOR HEREBY
+DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS OR IMPLIED,
+INCLUDING (WITHOUT LIMITATION) WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO
+EVENT SHALL THE LICENSOR BE LIABLE FOR ANY DAMAGES ARISING
+FROM YOUR USE OF THE LICENSED WORK.
+
+For commercial licensing inquiries:
+  ahmedparr93@gmail.com
+  SNAPKITTYWEST / Bel Esprit D'Accord Irrevocable Trust
