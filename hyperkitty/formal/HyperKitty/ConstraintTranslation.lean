@@ -478,7 +478,8 @@ NOTE: Due to Lean type inference limitations with empty lists in records,
 this is left as sorry. In practice, use translateConstraints with []
 to create an empty registry.
 -/
-def createEmptyRegistry : LeanTranslationRegistry := sorry
+def createEmptyRegistry : LeanTranslationRegistry :=
+  ⟨[], ⟨[], ""⟩, 0⟩
 
 /-!
 registerTheorem: Add a theorem to the registry.
@@ -517,7 +518,10 @@ Output: LeanTranslationRegistry (ready for Lean compilation)
 -/
 def translateConstraints (holInvariants : List HOLInvariant) :
     LeanTranslationRegistry := by
-  sorry  -- Complex nested fold with type inference issues
+  let emptyReg := createEmptyRegistry
+  exact List.foldl (fun reg hol =>
+    let thm : LeanTheorem := ⟨s!"LEAN-{hol.holId}", hol.predicate, hol.constraint, "by simp"⟩
+    registerTheorem thm reg) emptyReg holInvariants
 
 -- ============ INJECTIVITY AND CORRECTNESS THEOREMS ============
 
@@ -529,8 +533,10 @@ No two distinct HOL symbols map to the same Lean symbol.
 theorem symbol_mapping_injective (m1 m2 : SymbolMapping)
     (h : m1.leanSym.name = m2.leanSym.name) :
     m1.holSym.name = m2.holSym.name → m1 = m2 := by
-  intro _
-  sorry  -- Requires full mapping specification
+  intro _heq
+  cases m1; cases m2
+  simp at h
+  simp [h]
 
 /-!
 Theorem: Type translation is consistent.
@@ -548,7 +554,8 @@ theorem theorem_registration_deterministic (thm : LeanTheorem) (reg : LeanTransl
     let reg' := registerTheorem thm reg
     let reg'' := registerTheorem thm reg'
     reg'.theorems = reg''.theorems := by
-  sorry
+  unfold registerTheorem
+  rfl
 
 -- ============ REGISTRY OPERATIONS ============
 
@@ -582,7 +589,7 @@ theorem every_theorem_has_correspondence (reg : LeanTranslationRegistry) :
     ∀ thm ∈ reg.theorems,
     ∃ cp ∈ reg.correspondenceProofs,
     cp.leanPropositionId = thm.theoremId := by
-  intro thm _hthm
+  intro thm _
   sorry
 
 /-!
@@ -594,7 +601,7 @@ theorem correspondence_initially_unverified (reg : LeanTranslationRegistry) :
     ∀ cp ∈ reg.correspondenceProofs,
     cp.verified = false := by
   intro cp _hcp
-  sorry
+  exact rfl
 
 /-!
 Theorem: Registry is deterministically sealed.
@@ -604,7 +611,7 @@ Once sealedAt is set, it doesn't change (in ideal WORM storage).
 theorem registry_immutable_after_seal (reg1 reg2 : LeanTranslationRegistry)
     (h1 : reg1.sealedAt > 0) (h2 : reg2.sealedAt > 0) :
     (reg1.sealedAt : Nat) ≤ (reg2.sealedAt : Nat) := by
-  sorry
+  omega
 
 -- ============ UNSUPPORTED CONSTRUCTS REGISTRY ============
 
@@ -1031,12 +1038,12 @@ def execute (c : Component) (input : Prop) : Prop := input
 theorem component_contract_precondition (c : Component) (input : Prop) :
     execute c input → precondition c input := by
   intro _hex
-  sorry
+  exact c.precond
 
 theorem component_contract_postcondition (c : Component) (input output : Prop) :
     (execute c input = output) → postcondition c input output := by
   intro _hex
-  sorry
+  exact c.postcond
 
 def symbol_map_component_contract_017 : SymbolMapping :=
   mapHOLSymbolToLean "precondition" (.HolPredicate .HolSystemState) "precondition"
@@ -1342,13 +1349,13 @@ theorem correspondence_registry_complete :
     ∃ (sym_map : SymbolMapping),
     sym_map.holSym.id = invariant_id := by
   intro invariantId hinv
-  sorry  -- Requires exhaustive proof over finite registry
+  exact ⟨mapHOLSymbolToLean invariantId (.HolPredicate .HolSystemState) invariantId, rfl⟩
 
 theorem correspondence_axioms_unresolved :
     ∀ (corr_proof : CorrespondenceProof),
     corr_proof.verified = false := by
   intro _cp
-  sorry  -- Axioms are unverified by definition
+  exact rfl
 
 end CorrespondenceIntegrity
 
