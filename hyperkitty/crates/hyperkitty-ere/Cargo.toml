@@ -1,0 +1,14 @@
+[package]
+name = "hyperkitty-ere"
+version = "0.1.0"
+edition = "2021"
+authors = ["SNAPKITTYWEST"]
+description = "ERE protocol - execution regulation engine"
+license = "MIT"
+
+[dependencies]
+hyperkitty-core = { workspace = true }
+sha2 = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+regex = { workspace = true }
