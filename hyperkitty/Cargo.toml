@@ -1,0 +1,72 @@
+[package]
+name = "hyperkitty"
+version = "0.1.0"
+edition = "2021"
+authors = ["SNAPKITTYWEST"]
+description = "HyperKitty - Deterministic Routing Engine"
+license = "MIT"
+
+[[bin]]
+name = "hyperkitty"
+path = "src/main.rs"
+
+[workspace]
+members = [
+    ".",
+    "crates/hyperkitty-core",
+    "crates/hyperkitty-qlg",
+    "crates/hyperkitty-sla",
+    "crates/hyperkitty-qra",
+    "crates/hyperkitty-isomorphism",
+    "crates/hyperkitty-witness",
+    "crates/hyperkitty-jordan",
+    "crates/hyperkitty-nand",
+    "crates/hyperkitty-constraints",
+    "crates/hyperkitty-routing",
+    "crates/hyperkitty-worm",
+    "crates/hyperkitty-magma",
+    "crates/hyperkitty-ere",
+    "crates/hyperkitty-continuity", "crates/hyperkitty-art",
+]
+resolver = "2"
+
+[dependencies]
+hyperkitty-core = { path = "crates/hyperkitty-core", version = "0.1.0" }
+hyperkitty-qlg = { path = "crates/hyperkitty-qlg", version = "0.1.0" }
+hyperkitty-sla = { path = "crates/hyperkitty-sla", version = "0.1.0" }
+hyperkitty-qra = { path = "crates/hyperkitty-qra", version = "0.1.0" }
+hyperkitty-isomorphism = { path = "crates/hyperkitty-isomorphism", version = "0.1.0" }
+hyperkitty-witness = { path = "crates/hyperkitty-witness", version = "0.1.0" }
+hyperkitty-ere = { path = "crates/hyperkitty-ere", version = "0.1.0" }
+hyperkitty-constraints = { path = "crates/hyperkitty-constraints", version = "0.1.0" }
+hyperkitty-routing = { path = "crates/hyperkitty-routing", version = "0.1.0" }
+hyperkitty-worm = { path = "crates/hyperkitty-worm", version = "0.1.0" }
+hyperkitty-art = { path = "crates/hyperkitty-art", version = "0.1.0" }
+
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[workspace.dependencies]
+hyperkitty-core = { path = "crates/hyperkitty-core", version = "0.1.0" }
+hyperkitty-qlg = { path = "crates/hyperkitty-qlg", version = "0.1.0" }
+hyperkitty-sla = { path = "crates/hyperkitty-sla", version = "0.1.0" }
+hyperkitty-qra = { path = "crates/hyperkitty-qra", version = "0.1.0" }
+hyperkitty-isomorphism = { path = "crates/hyperkitty-isomorphism", version = "0.1.0" }
+hyperkitty-witness = { path = "crates/hyperkitty-witness", version = "0.1.0" }
+hyperkitty-nand = { path = "crates/hyperkitty-nand", version = "0.1.0" }
+hyperkitty-constraints = { path = "crates/hyperkitty-constraints", version = "0.1.0" }
+hyperkitty-routing = { path = "crates/hyperkitty-routing", version = "0.1.0" }
+hyperkitty-magma = { path = "crates/hyperkitty-magma", version = "0.1.0" }
+hyperkitty-ere = { path = "crates/hyperkitty-ere", version = "0.1.0" }
+hyperkitty-continuity = { path = "crates/hyperkitty-continuity", version = "0.1.0" }
+hyperkitty-worm = { path = "crates/hyperkitty-worm", version = "0.1.0" }
+hyperkitty-jordan = { path = "crates/hyperkitty-jordan", version = "0.1.0" }
+hyperkitty-art = { path = "crates/hyperkitty-art", version = "0.1.0" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+sha2 = "0.10"
+regex = "1.10"
+
+[profile.release]
+opt-level = 3
