@@ -28,7 +28,6 @@ members = [
     "crates/hyperkitty-ere",
     "crates/hyperkitty-continuity",
     "crates/hyperkitty-art",
-    "../lightweight-assembly-rust-bridge",
 ]
 resolver = "2"
 

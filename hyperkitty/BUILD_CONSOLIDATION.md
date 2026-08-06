@@ -98,12 +98,13 @@ hyperkitty/                              (root workspace)
 
 ---
 
-## Build Command
+## Build Commands
 
+### HyperKitty Workspace (primary)
 ```bash
 cd /c/Users/jessi/SNAPKITTYWEST/hyperkitty
 
-# Full workspace build
+# Full workspace build (17 crates)
 cargo build --all
 
 # Run all tests
@@ -117,6 +118,48 @@ cargo fmt --all -- --check
 
 # Lint
 cargo clippy --all-targets --all-features -- -D warnings
+
+# Formal verification (Lean 4)
+cd formal && lake build
+```
+
+### Lightweight Assembly Rust Bridge (separate)
+```bash
+cd /c/Users/jessi/SNAPKITTYWEST/lightweight-assembly-rust-bridge
+
+# Build bridge
+cargo build --all
+
+# Run bridge tests
+cargo test --all
+
+# Enable XSLT transformation features
+cargo build --features xml-transform
+
+# Full verification pipeline
+make ci
+```
+
+### Combined Build (sequential)
+```bash
+#!/bin/bash
+set -e
+
+echo "Building HyperKitty workspace..."
+cd /c/Users/jessi/SNAPKITTYWEST/hyperkitty
+cargo build --all
+cargo test --all
+
+echo "Building Lightweight Assembly Bridge..."
+cd /c/Users/jessi/SNAPKITTYWEST/lightweight-assembly-rust-bridge
+cargo build --all
+cargo test --all
+
+echo "Building Lean formal verification..."
+cd /c/Users/jessi/SNAPKITTYWEST/hyperkitty/formal
+lake build
+
+echo "✅ All builds complete"
 ```
 
 ---

@@ -1,0 +1,47 @@
+[package]
+name = "lightweight-assembly-rust-bridge"
+version = "0.1.0"
+edition = "2021"
+authors = ["SNAPKITTYWEST"]
+description = "Lightweight Assembly Rust Bridge - Native, WASM, and Reference backends with XSLT transformation"
+license = "MIT"
+
+[dependencies]
+# Core dependencies (no_std compatible)
+thiserror = "1.0"
+
+# Optional XML/XSLT transformation
+xml-rs = { version = "0.8", optional = true }
+xmltree = { version = "0.10", optional = true }
+quick-xml = { version = "0.30", optional = true, features = ["serialize"] }
+serde = { version = "1.0", optional = true, features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+
+[features]
+default = []
+reference = []
+xml-transform = ["dep:xml-rs", "dep:xmltree", "dep:quick-xml", "dep:serde", "dep:serde_json"]
+
+[lib]
+name = "lightweight_assembly_rust_bridge"
+path = "src/lib.rs"
+
+[[test]]
+name = "equivalence"
+path = "tests/equivalence.rs"
+
+[[test]]
+name = "native_backend"
+path = "tests/native_backend.rs"
+
+[[test]]
+name = "boundary_cases"
+path = "tests/boundary_cases.rs"
+
+[[example]]
+name = "native_demo"
+path = "examples/native_demo.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
