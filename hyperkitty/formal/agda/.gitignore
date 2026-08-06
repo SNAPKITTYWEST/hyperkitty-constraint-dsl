@@ -1,0 +1,6 @@
+_build/
+*.agdai
+.DS_Store
+*.swp
+*.swo
+*~

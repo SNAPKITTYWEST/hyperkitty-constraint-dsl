@@ -1,0 +1,6 @@
+name: hyperkitty
+version: 1.0.0
+author: Jessica + Ahmad
+homepage: https://github.com/SNAPKITTYWEST/hyperkitty
+depend: standard-library
+include: .
